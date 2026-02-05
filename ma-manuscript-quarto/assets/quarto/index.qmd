@@ -1,0 +1,17 @@
+---
+title: "Meta-analysis Manuscript"
+format:
+  pdf: default
+  html: default
+bibliography: references.bib
+---
+
+{{< include 00_abstract.qmd >}}
+
+{{< include 01_introduction.qmd >}}
+
+{{< include 02_methods.qmd >}}
+
+{{< include 03_results.qmd >}}
+
+{{< include 04_discussion.qmd >}}

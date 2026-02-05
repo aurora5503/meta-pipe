@@ -1,0 +1,20 @@
+population:
+  description: ""
+  age_range: ""
+  condition: ""
+intervention:
+  description: ""
+comparison:
+  description: ""
+outcomes:
+  primary:
+    - name: ""
+      type: ""
+      unit: ""
+  secondary: []
+setting:
+  timeframe: ""
+  geography: ""
+study_types:
+  include: []
+  exclude: []

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude-code__Read",
+      "Bash(uv run:*)"
+    ]
+  }
+}
