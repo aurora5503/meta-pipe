@@ -17,8 +17,12 @@
 - [ ] `result_paragraphs.md` generated
 - [ ] `result_paragraphs.qmd` generated
 - [ ] `result_summary_table.md` generated
+- [ ] `study_characteristics.md` generated
+- [ ] `study_characteristics.csv` generated
 - [ ] `traceability_table.md` generated and inserted into `02_methods.qmd`
 - [ ] `03_results.qmd` assembled from `result_paragraphs.qmd`
 - [ ] Result summary table inserted into `03_results.qmd`
+- [ ] Study characteristics table inserted into `03_results.qmd`
+- [ ] `submission_checklist.md` generated
 - [ ] `manuscript.pdf` rendered
 - [ ] `manuscript.html` rendered

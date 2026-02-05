@@ -198,11 +198,22 @@ uv run ../../ma-manuscript-quarto/scripts/build_result_paragraphs.py \
   --claims 07_manuscript/result_claims.csv \
   --out 07_manuscript/result_paragraphs.md
 This also writes `07_manuscript/result_paragraphs.qmd` and `07_manuscript/result_summary_table.md`.
+Set `RESULTS_MIN_WORDS` in your environment to change minimum words per claim paragraph (default 25).
+
+uv run ../../ma-manuscript-quarto/scripts/build_study_characteristics.py \
+  --extraction 05_extraction/extraction.csv \
+  --out-csv 07_manuscript/study_characteristics.csv \
+  --out-md 07_manuscript/study_characteristics.md \
+  --results 07_manuscript/03_results.qmd
 
 uv run ../../ma-manuscript-quarto/scripts/assemble_results.py \
   --results 07_manuscript/03_results.qmd \
   --paragraphs 07_manuscript/result_paragraphs.qmd
 This also inserts `result_summary_table.md` into `03_results.qmd`.
+
+uv run ../../ma-manuscript-quarto/scripts/init_submission_checklist.py \
+  --journal "<target journal>" \
+  --out 07_manuscript/submission_checklist.md
 
 uv run ../../ma-manuscript-quarto/scripts/results_consistency_report.py \
   --root ../.. \

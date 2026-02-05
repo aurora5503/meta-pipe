@@ -79,10 +79,13 @@ def main() -> None:
     result_paragraphs = root / "07_manuscript" / "result_paragraphs.md"
     result_paragraphs_qmd = root / "07_manuscript" / "result_paragraphs.qmd"
     result_summary_table = root / "07_manuscript" / "result_summary_table.md"
+    study_characteristics_md = root / "07_manuscript" / "study_characteristics.md"
+    study_characteristics_csv = root / "07_manuscript" / "study_characteristics.csv"
     traceability_table = root / "07_manuscript" / "traceability_table.md"
     methods_qmd = root / "07_manuscript" / "02_methods.qmd"
     results_qmd = root / "07_manuscript" / "03_results.qmd"
     results_consistency = root / "09_qa" / "results_consistency_report.md"
+    submission_checklist = root / "07_manuscript" / "submission_checklist.md"
     ok_claim = claim_audit.exists()
     ok_crossref = crossref_report.exists()
     ok_reporting = reporting_audit.exists()
@@ -94,6 +97,8 @@ def main() -> None:
     ok_result_paragraphs = result_paragraphs.exists()
     ok_result_paragraphs_qmd = result_paragraphs_qmd.exists()
     ok_result_summary_table = result_summary_table.exists()
+    ok_study_characteristics_md = study_characteristics_md.exists()
+    ok_study_characteristics_csv = study_characteristics_csv.exists()
     ok_traceability = traceability_table.exists()
     ok_traceability_inserted = False
     if methods_qmd.exists():
@@ -107,6 +112,10 @@ def main() -> None:
     if results_qmd.exists():
         text = results_qmd.read_text()
         ok_summary_inserted = "<!-- RESULT_SUMMARY_TABLE_START -->" in text and "<!-- RESULT_SUMMARY_TABLE_END -->" in text
+    ok_study_characteristics_inserted = False
+    if results_qmd.exists():
+        text = results_qmd.read_text()
+        ok_study_characteristics_inserted = "<!-- STUDY_CHARACTERISTICS_START -->" in text and "<!-- STUDY_CHARACTERISTICS_END -->" in text
     hash_json = root / args.hashes
     checks.append(status_line(ok_claim, "Claim audit present"))
     checks.append(status_line(ok_crossref, "Cross-reference report present"))
@@ -119,10 +128,14 @@ def main() -> None:
     checks.append(status_line(ok_result_paragraphs, "Result paragraph stubs present"))
     checks.append(status_line(ok_result_paragraphs_qmd, "Result paragraph QMD present"))
     checks.append(status_line(ok_result_summary_table, "Result summary table present"))
+    checks.append(status_line(ok_study_characteristics_md, "Study characteristics table (md) present"))
+    checks.append(status_line(ok_study_characteristics_csv, "Study characteristics table (csv) present"))
     checks.append(status_line(ok_traceability, "Traceability table present"))
     checks.append(status_line(ok_traceability_inserted, "Traceability table inserted into Methods"))
     checks.append(status_line(ok_results_inserted, "Result paragraphs inserted into Results"))
     checks.append(status_line(ok_summary_inserted, "Result summary table inserted into Results"))
+    checks.append(status_line(ok_study_characteristics_inserted, "Study characteristics inserted into Results"))
+    checks.append(status_line(submission_checklist.exists(), "Submission checklist present"))
     checks.append(status_line(results_consistency.exists(), "Results consistency report present"))
     checks.append(status_line(hash_json.exists(), "Artifact hashes present"))
     if not ok_claim:
@@ -147,6 +160,10 @@ def main() -> None:
         issues.append(f"Missing result paragraph QMD: {result_paragraphs_qmd}")
     if not ok_result_summary_table:
         issues.append(f"Missing result summary table: {result_summary_table}")
+    if not ok_study_characteristics_md:
+        issues.append(f"Missing study characteristics table: {study_characteristics_md}")
+    if not ok_study_characteristics_csv:
+        issues.append(f"Missing study characteristics CSV: {study_characteristics_csv}")
     if not ok_traceability:
         issues.append(f"Missing traceability table: {traceability_table}")
     if not ok_traceability_inserted:
@@ -155,6 +172,10 @@ def main() -> None:
         issues.append(f"Result paragraphs not inserted into Results: {results_qmd}")
     if not ok_summary_inserted:
         issues.append(f"Result summary table not inserted into Results: {results_qmd}")
+    if not ok_study_characteristics_inserted:
+        issues.append(f"Study characteristics not inserted into Results: {results_qmd}")
+    if not submission_checklist.exists():
+        issues.append(f"Missing submission checklist: {submission_checklist}")
     if not results_consistency.exists():
         issues.append(f"Missing results consistency report: {results_consistency}")
     if not hash_json.exists():
@@ -213,9 +234,12 @@ def main() -> None:
         "result_paragraphs": file_timestamp(result_paragraphs),
         "result_paragraphs_qmd": file_timestamp(result_paragraphs_qmd),
         "result_summary_table": file_timestamp(result_summary_table),
+        "study_characteristics_md": file_timestamp(study_characteristics_md),
+        "study_characteristics_csv": file_timestamp(study_characteristics_csv),
         "traceability_table": file_timestamp(traceability_table),
         "results_qmd": file_timestamp(results_qmd),
         "results_consistency_report": file_timestamp(results_consistency),
+        "submission_checklist": file_timestamp(submission_checklist),
         "artifact_hashes": file_timestamp(hash_json),
     }
 

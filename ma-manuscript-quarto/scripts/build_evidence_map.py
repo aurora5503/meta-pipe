@@ -109,6 +109,9 @@ def main() -> None:
     add_file(lines, "07_manuscript/result_paragraphs.md", root / "07_manuscript" / "result_paragraphs.md")
     add_file(lines, "07_manuscript/result_paragraphs.qmd", root / "07_manuscript" / "result_paragraphs.qmd")
     add_file(lines, "07_manuscript/result_summary_table.md", root / "07_manuscript" / "result_summary_table.md")
+    add_file(lines, "07_manuscript/study_characteristics.md", root / "07_manuscript" / "study_characteristics.md")
+    add_file(lines, "07_manuscript/study_characteristics.csv", root / "07_manuscript" / "study_characteristics.csv")
+    add_file(lines, "07_manuscript/submission_checklist.md", root / "07_manuscript" / "submission_checklist.md")
     add_file(lines, "07_manuscript/traceability_table.md", root / "07_manuscript" / "traceability_table.md")
 
     section_header(lines, "QA")

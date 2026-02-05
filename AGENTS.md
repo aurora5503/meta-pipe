@@ -230,6 +230,14 @@ uv run ../../ma-manuscript-quarto/scripts/build_result_paragraphs.py \
   --claims 07_manuscript/result_claims.csv \
   --out 07_manuscript/result_paragraphs.md
 This also writes `07_manuscript/result_paragraphs.qmd` and `07_manuscript/result_summary_table.md`.
+Set `RESULTS_MIN_WORDS` in the environment to change minimum words per claim paragraph (default 25).
+
+# Study characteristics table
+uv run ../../ma-manuscript-quarto/scripts/build_study_characteristics.py \
+  --extraction 05_extraction/extraction.csv \
+  --out-csv 07_manuscript/study_characteristics.csv \
+  --out-md 07_manuscript/study_characteristics.md \
+  --results 07_manuscript/03_results.qmd
 
 # Assemble Results into 03_results.qmd
 uv run ../../ma-manuscript-quarto/scripts/assemble_results.py \
@@ -237,11 +245,22 @@ uv run ../../ma-manuscript-quarto/scripts/assemble_results.py \
   --paragraphs 07_manuscript/result_paragraphs.qmd
 This also inserts `result_summary_table.md` into `03_results.qmd`.
 
+# Submission checklist (journal-specific)
+uv run ../../ma-manuscript-quarto/scripts/init_submission_checklist.py \
+  --journal "<target journal>" \
+  --out 07_manuscript/submission_checklist.md
+
 # Results consistency report (QA)
 uv run ../../ma-manuscript-quarto/scripts/results_consistency_report.py \
   --root ../.. \
   --out 09_qa/results_consistency_report.md \
   --strict
+
+# Insert traceability table into Methods
+uv run ../../ma-manuscript-quarto/scripts/insert_traceability_table.py \
+  --root ../.. --round round-01 \
+  --methods 07_manuscript/02_methods.qmd \
+  --out-table 07_manuscript/traceability_table.md
 
 # Render
 uv run ../../ma-manuscript-quarto/scripts/render_manuscript.py \
