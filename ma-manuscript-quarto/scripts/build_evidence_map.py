@@ -108,6 +108,7 @@ def main() -> None:
     add_file(lines, "07_manuscript/result_claims.csv", root / "07_manuscript" / "result_claims.csv")
     add_file(lines, "07_manuscript/result_paragraphs.md", root / "07_manuscript" / "result_paragraphs.md")
     add_file(lines, "07_manuscript/result_paragraphs.qmd", root / "07_manuscript" / "result_paragraphs.qmd")
+    add_file(lines, "07_manuscript/result_summary_table.md", root / "07_manuscript" / "result_summary_table.md")
     add_file(lines, "07_manuscript/traceability_table.md", root / "07_manuscript" / "traceability_table.md")
 
     section_header(lines, "QA")
@@ -115,6 +116,7 @@ def main() -> None:
     add_file(lines, "09_qa/reporting_checklist_audit.md", root / "09_qa" / "reporting_checklist_audit.md")
     add_file(lines, "09_qa/claim_table_check.md", root / "09_qa" / "claim_table_check.md")
     add_file(lines, "09_qa/crossref_report.md", root / "09_qa" / "crossref_report.md")
+    add_file(lines, "09_qa/results_consistency_report.md", root / "09_qa" / "results_consistency_report.md")
 
     out_path = root / args.out
     out_path.parent.mkdir(parents=True, exist_ok=True)

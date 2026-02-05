@@ -13,3 +13,4 @@
 - [ ] `artifact_hashes.json` generated
 - [ ] `stage_transition_report.md` generated
 - [ ] Checkpoint created or explicitly skipped (`09_qa/checkpoint.log`)
+- [ ] `results_consistency_report.md` generated

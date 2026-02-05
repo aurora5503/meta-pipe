@@ -1,1 +1,18 @@
 <Paste your meta-analysis topic here>
+
+Or say "help me brainstorm a topic" to develop one interactively.
+
+Example format:
+---
+Research Question:
+Is [intervention] effective for [outcome] in [population] compared to [comparator]?
+
+Population: [specific patient group]
+Intervention: [treatment/exposure]
+Comparator: [control condition]
+Outcomes:
+- Primary: [main outcome]
+- Secondary: [other outcomes]
+
+Study Designs: [RCTs / RCTs + observational]
+---

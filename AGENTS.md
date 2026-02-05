@@ -2,6 +2,25 @@
 
 AI-assisted meta-analysis pipeline. This file is auto-loaded by Claude Code.
 
+## When User Says "Brainstorm" or "Help me find a topic"
+
+Use the **brainstorm-topic** skill (`.claude/skills/brainstorm-topic.md`):
+
+1. **Ask ONE question at a time** - don't overwhelm
+2. **Guide through PICO** iteratively:
+   - Clinical area → Condition → Population → Intervention → Comparator → Outcomes
+3. **Check feasibility** - quick PubMed search to estimate study count
+4. **Present refined topic** in structured format
+5. **Save to `TOPIC.txt`** once confirmed
+6. **Offer to start** the pipeline
+
+Example prompts that trigger this:
+
+- "help me brainstorm a topic"
+- "I don't know what to study"
+- "help me refine my research question"
+- "/brainstorm"
+
 ## When User Says "Start" or "See TOPIC.txt"
 
 1. **Read `TOPIC.txt`** to understand the research question
@@ -21,6 +40,7 @@ AI-assisted meta-analysis pipeline. This file is auto-loaded by Claude Code.
 ## Resume Behavior
 
 If user says "continue", "what's next", or "status":
+
 1. Check which stage folders have content
 2. Report current progress
 3. Suggest next action
@@ -35,21 +55,22 @@ If user says "continue", "what's next", or "status":
 
 ## Pipeline Stages
 
-| Stage | Folder | Key Output | Validation |
-|-------|--------|------------|------------|
-| 01 | `01_protocol/` | pico.yaml, eligibility.md | PICO complete |
-| 02 | `02_search/` | dedupe.bib | Records > 0 |
-| 03 | `03_screening/` | decisions.csv | Kappa ≥ 0.60 |
-| 04 | `04_fulltext/` | manifest.csv | PDFs collected |
-| 05 | `05_extraction/` | extraction.csv | No missing study_id |
-| 06 | `06_analysis/` | figures/, tables/ | R scripts 01-09 |
-| 07 | `07_manuscript/` | manuscript.pdf | PRISMA complete |
-| 08 | `08_reviews/` | grade_summary.md | GRADE filled |
-| 09 | `09_qa/` | final_qa_report.md | All checks pass |
+| Stage | Folder           | Key Output                | Validation          |
+| ----- | ---------------- | ------------------------- | ------------------- |
+| 01    | `01_protocol/`   | pico.yaml, eligibility.md | PICO complete       |
+| 02    | `02_search/`     | dedupe.bib                | Records > 0         |
+| 03    | `03_screening/`  | decisions.csv             | Kappa ≥ 0.60        |
+| 04    | `04_fulltext/`   | manifest.csv              | PDFs collected      |
+| 05    | `05_extraction/` | extraction.csv            | No missing study_id |
+| 06    | `06_analysis/`   | figures/, tables/         | R scripts 01-12     |
+| 07    | `07_manuscript/` | manuscript.pdf            | PRISMA complete     |
+| 08    | `08_reviews/`    | grade_summary.md          | GRADE filled        |
+| 09    | `09_qa/`         | final_qa_report.md        | All checks pass     |
 
 ## Decision Points (Ask User)
 
 Only ask if information is missing from TOPIC.txt:
+
 - Target population, intervention, comparator, outcomes (PICO)
 - Which databases to search
 - Risk-of-bias tool (RoB 2 vs ROBINS-I)
@@ -69,6 +90,11 @@ uv run ../../ma-search-bibliography/scripts/build_queries.py \
   --pico ../../01_protocol/pico.yaml \
   --out ../../02_search/round-01/queries.txt
 
+# With MeSH expansion
+uv run ../../ma-search-bibliography/scripts/expand_terms.py \
+  --pico ../../01_protocol/pico.yaml \
+  --out ../../02_search/round-01/expanded_terms.yaml
+
 # PubMed search
 uv add biopython requests bibtexparser pyyaml
 uv run ../../ma-search-bibliography/scripts/pubmed_fetch.py \
@@ -76,16 +102,44 @@ uv run ../../ma-search-bibliography/scripts/pubmed_fetch.py \
   --out-bib ../../02_search/round-01/results.bib \
   --out-log ../../02_search/round-01/log.md
 
-# Multi-DB (all at once)
+# Scopus search (requires SCOPUS_API_KEY in .env)
+uv run ../../ma-search-bibliography/scripts/scopus_fetch.py \
+  --query "<query>" --out-bib ../../02_search/round-01/scopus.bib
+
+# Embase search (requires EMBASE_API_KEY in .env)
+uv run ../../ma-search-bibliography/scripts/embase_fetch.py \
+  --query "<query>" --out-bib ../../02_search/round-01/embase.bib
+
+# Cochrane search
+uv run ../../ma-search-bibliography/scripts/cochrane_fetch.py \
+  --query "<query>" --out-bib ../../02_search/round-01/cochrane.bib
+
+# Multi-DB merge and dedupe
+uv run ../../ma-search-bibliography/scripts/multi_db_dedupe.py \
+  --in-bib ../../02_search/round-01/results.bib \
+  --in-bib ../../02_search/round-01/scopus.bib \
+  --in-bib ../../02_search/round-01/embase.bib \
+  --out-merged ../../02_search/round-01/merged.bib \
+  --out-bib ../../02_search/round-01/dedupe.bib
+
+# Or run all databases at once
 uv run ../../ma-search-bibliography/scripts/run_multi_db_search.py \
   --root ../.. --round round-01 --email "you@example.com"
 
-# Dedupe
+# Single-source dedupe
 uv run ../../ma-search-bibliography/scripts/dedupe_bib.py \
   --in-bib ../../02_search/round-01/results.bib \
   --out-bib ../../02_search/round-01/dedupe.bib \
   --out-log ../../02_search/round-01/dedupe.log
+
+# Zotero integration (optional)
+uv run ../../ma-search-bibliography/scripts/zotero_fetch.py \
+  --collection-key "<key>" --out-bib ../../02_search/round-01/zotero.bib
+
+uv run ../../ma-search-bibliography/scripts/zotero_sync.py \
+  --in-bib ../../02_search/round-01/dedupe.bib --collection-key "<key>"
 ```
+
 </details>
 
 <details>
@@ -99,6 +153,7 @@ uv run ../../ma-screening-quality/scripts/dual_review_agreement.py \
   --col-a decision_r1 --col-b decision_r2 \
   --out ../../03_screening/round-01/agreement.md
 ```
+
 </details>
 
 <details>
@@ -109,6 +164,7 @@ uv run ../../ma-fulltext-management/scripts/unpaywall_fetch.py \
   --in-bib ../../03_screening/round-01/included.bib \
   --out-csv ../../04_fulltext/unpaywall_results.csv
 ```
+
 </details>
 
 <details>
@@ -121,16 +177,31 @@ uv run ../../ma-data-extraction/scripts/llm_extract.py \
   --data-dictionary ../../05_extraction/data-dictionary.md \
   --out-jsonl ../../05_extraction/llm_suggestions.jsonl
 ```
+
 </details>
 
 <details>
 <summary><strong>Stage 06: Analysis (R)</strong></summary>
 
 Run in order from `06_analysis/`:
+
+**Core analysis (ma-meta-analysis/assets/r/):**
+
 ```
 01_setup.R → 02_effect_sizes.R → 03_models.R → 04_subgroups_meta_regression.R
 → 05_plots.R → 06_tables.R → 07_sensitivity.R → 08_bias.R → 09_validation.R
 ```
+
+**Publication quality (ma-publication-quality/assets/r/):**
+
+```
+10_hakn_prediction.R    # Hartung-Knapp prediction intervals
+11_influence_diagnostics.R  # Leave-one-out influence analysis
+12_sof_table.R          # Summary of Findings table
+```
+
+Use `renv` for reproducibility. Copy R scripts from asset folders to `06_analysis/`.
+
 </details>
 
 <details>
@@ -151,21 +222,32 @@ uv run ../../ma-manuscript-quarto/scripts/build_evidence_map.py \
 # Result claims table
 uv run ../../ma-manuscript-quarto/scripts/init_result_claims.py \
   --root ../.. --out 07_manuscript/result_claims.csv
+Render will fail if any claim is missing `effect_estimate`, `ci`, `p_value`, or `citation_keys`.
+Fill `citation_keys` as comma-separated BibTeX keys (e.g., `smith2020,doe2019`).
 
 # Generate result paragraphs
 uv run ../../ma-manuscript-quarto/scripts/build_result_paragraphs.py \
   --claims 07_manuscript/result_claims.csv \
   --out 07_manuscript/result_paragraphs.md
+This also writes `07_manuscript/result_paragraphs.qmd` and `07_manuscript/result_summary_table.md`.
 
 # Assemble Results into 03_results.qmd
 uv run ../../ma-manuscript-quarto/scripts/assemble_results.py \
   --results 07_manuscript/03_results.qmd \
   --paragraphs 07_manuscript/result_paragraphs.qmd
+This also inserts `result_summary_table.md` into `03_results.qmd`.
+
+# Results consistency report (QA)
+uv run ../../ma-manuscript-quarto/scripts/results_consistency_report.py \
+  --root ../.. \
+  --out 09_qa/results_consistency_report.md \
+  --strict
 
 # Render
 uv run ../../ma-manuscript-quarto/scripts/render_manuscript.py \
   --root ../.. --index 07_manuscript/index.qmd
 ```
+
 </details>
 
 <details>
@@ -181,6 +263,7 @@ uv run ../../ma-peer-review/scripts/auto_grade_suggestion.py \
   --grade ../../08_reviews/grade_summary.csv \
   --out-csv ../../08_reviews/grade_suggestions.csv
 ```
+
 </details>
 
 <details>
@@ -192,11 +275,24 @@ uv run ../../ma-end-to-end/scripts/final_qa_report.py \
   --out 09_qa/final_qa_report.md --out-json 09_qa/final_qa_report.json
 
 # Publication quality checks
+uv run ../../ma-publication-quality/scripts/init_reporting_checklists.py \
+  --root ../.. --include-moose
+
 uv run ../../ma-publication-quality/scripts/claim_audit.py \
   --abstract ../../07_manuscript/00_abstract.qmd \
   --results ../../07_manuscript/03_results.qmd \
   --out ../../09_qa/claim_audit.md
+
+uv run ../../ma-publication-quality/scripts/crossref_check.py \
+  --manuscript-dir ../../07_manuscript \
+  --figures-dir ../../06_analysis/figures \
+  --out ../../09_qa/crossref_report.md
+
+# Hash artifacts for reproducibility audit
+uv run ../../ma-end-to-end/scripts/hash_artifacts.py \
+  --root ../.. --out 09_qa/artifact_hashes.json
 ```
+
 </details>
 
 <details>
@@ -212,17 +308,18 @@ uv run ../../ma-end-to-end/scripts/checkpoint.py --list
 # Restore (requires --yes)
 uv run ../../ma-end-to-end/scripts/checkpoint.py --restore --name pre-analysis --yes
 ```
+
 </details>
 
 ## QA Thresholds
 
-| Check | Threshold | Action if Failed |
-|-------|-----------|------------------|
-| Dual-review kappa | ≥ 0.60 | Flag, require reconciliation |
-| Missing study_id | 0 | Block extraction |
-| Numeric fields | ≥ 0 | Block analysis |
-| PRISMA NA counts | 0 | Reconcile before render |
-| Result-to-table mapping | 100% | Block manuscript |
+| Check                   | Threshold | Action if Failed             |
+| ----------------------- | --------- | ---------------------------- |
+| Dual-review kappa       | ≥ 0.60    | Flag, require reconciliation |
+| Missing study_id        | 0         | Block extraction             |
+| Numeric fields          | ≥ 0       | Block analysis               |
+| PRISMA NA counts        | 0         | Reconcile before render      |
+| Result-to-table mapping | 100%      | Block manuscript             |
 
 ## Documentation
 

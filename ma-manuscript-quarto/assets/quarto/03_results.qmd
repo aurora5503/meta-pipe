@@ -6,7 +6,13 @@
 
 ## Study Characteristics
 
+<!-- STUDY_CHARACTERISTICS_START -->
+<!-- STUDY_CHARACTERISTICS_END -->
+
 ## Quantitative Synthesis
+
+<!-- RESULT_SUMMARY_TABLE_START -->
+<!-- RESULT_SUMMARY_TABLE_END -->
 
 <!-- RESULT_PARAGRAPHS_START -->
 <!-- RESULT_PARAGRAPHS_END -->

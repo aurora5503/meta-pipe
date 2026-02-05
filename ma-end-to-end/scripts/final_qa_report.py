@@ -78,9 +78,11 @@ def main() -> None:
     result_claims = root / "07_manuscript" / "result_claims.csv"
     result_paragraphs = root / "07_manuscript" / "result_paragraphs.md"
     result_paragraphs_qmd = root / "07_manuscript" / "result_paragraphs.qmd"
+    result_summary_table = root / "07_manuscript" / "result_summary_table.md"
     traceability_table = root / "07_manuscript" / "traceability_table.md"
     methods_qmd = root / "07_manuscript" / "02_methods.qmd"
     results_qmd = root / "07_manuscript" / "03_results.qmd"
+    results_consistency = root / "09_qa" / "results_consistency_report.md"
     ok_claim = claim_audit.exists()
     ok_crossref = crossref_report.exists()
     ok_reporting = reporting_audit.exists()
@@ -91,6 +93,7 @@ def main() -> None:
     ok_result_claims = result_claims.exists()
     ok_result_paragraphs = result_paragraphs.exists()
     ok_result_paragraphs_qmd = result_paragraphs_qmd.exists()
+    ok_result_summary_table = result_summary_table.exists()
     ok_traceability = traceability_table.exists()
     ok_traceability_inserted = False
     if methods_qmd.exists():
@@ -100,6 +103,10 @@ def main() -> None:
     if results_qmd.exists():
         text = results_qmd.read_text()
         ok_results_inserted = "<!-- RESULT_PARAGRAPHS_START -->" in text and "<!-- RESULT_PARAGRAPHS_END -->" in text
+    ok_summary_inserted = False
+    if results_qmd.exists():
+        text = results_qmd.read_text()
+        ok_summary_inserted = "<!-- RESULT_SUMMARY_TABLE_START -->" in text and "<!-- RESULT_SUMMARY_TABLE_END -->" in text
     hash_json = root / args.hashes
     checks.append(status_line(ok_claim, "Claim audit present"))
     checks.append(status_line(ok_crossref, "Cross-reference report present"))
@@ -111,9 +118,12 @@ def main() -> None:
     checks.append(status_line(ok_result_claims, "Result claims table present"))
     checks.append(status_line(ok_result_paragraphs, "Result paragraph stubs present"))
     checks.append(status_line(ok_result_paragraphs_qmd, "Result paragraph QMD present"))
+    checks.append(status_line(ok_result_summary_table, "Result summary table present"))
     checks.append(status_line(ok_traceability, "Traceability table present"))
     checks.append(status_line(ok_traceability_inserted, "Traceability table inserted into Methods"))
     checks.append(status_line(ok_results_inserted, "Result paragraphs inserted into Results"))
+    checks.append(status_line(ok_summary_inserted, "Result summary table inserted into Results"))
+    checks.append(status_line(results_consistency.exists(), "Results consistency report present"))
     checks.append(status_line(hash_json.exists(), "Artifact hashes present"))
     if not ok_claim:
         issues.append(f"Missing claim audit: {claim_audit}")
@@ -135,12 +145,18 @@ def main() -> None:
         issues.append(f"Missing result paragraph stubs: {result_paragraphs}")
     if not ok_result_paragraphs_qmd:
         issues.append(f"Missing result paragraph QMD: {result_paragraphs_qmd}")
+    if not ok_result_summary_table:
+        issues.append(f"Missing result summary table: {result_summary_table}")
     if not ok_traceability:
         issues.append(f"Missing traceability table: {traceability_table}")
     if not ok_traceability_inserted:
         issues.append(f"Traceability table not inserted into Methods: {methods_qmd}")
     if not ok_results_inserted:
         issues.append(f"Result paragraphs not inserted into Results: {results_qmd}")
+    if not ok_summary_inserted:
+        issues.append(f"Result summary table not inserted into Results: {results_qmd}")
+    if not results_consistency.exists():
+        issues.append(f"Missing results consistency report: {results_consistency}")
     if not hash_json.exists():
         issues.append(f"Missing artifact hashes: {hash_json}")
 
@@ -196,8 +212,10 @@ def main() -> None:
         "result_claims": file_timestamp(result_claims),
         "result_paragraphs": file_timestamp(result_paragraphs),
         "result_paragraphs_qmd": file_timestamp(result_paragraphs_qmd),
+        "result_summary_table": file_timestamp(result_summary_table),
         "traceability_table": file_timestamp(traceability_table),
         "results_qmd": file_timestamp(results_qmd),
+        "results_consistency_report": file_timestamp(results_consistency),
         "artifact_hashes": file_timestamp(hash_json),
     }
 

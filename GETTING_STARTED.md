@@ -157,9 +157,22 @@ uv run ../../ma-data-extraction/scripts/llm_extract.py \
 
 ## 8. Run Analysis (Stage 06)
 
-Run R scripts in order: `01_setup.R` → `09_validation.R`
+**Core analysis (ma-meta-analysis/assets/r/):**
 
-Use `renv` for reproducibility.
+```
+01_setup.R → 02_effect_sizes.R → 03_models.R → 04_subgroups_meta_regression.R
+→ 05_plots.R → 06_tables.R → 07_sensitivity.R → 08_bias.R → 09_validation.R
+```
+
+**Publication quality (ma-publication-quality/assets/r/):**
+
+```
+10_hakn_prediction.R    # Hartung-Knapp prediction intervals
+11_influence_diagnostics.R  # Leave-one-out influence analysis
+12_sof_table.R          # Summary of Findings table
+```
+
+Use `renv` for reproducibility. Copy R scripts from asset folders to `06_analysis/`.
 
 ## 9. Assemble Manuscript (Stage 07)
 
@@ -178,16 +191,23 @@ uv run ../../ma-manuscript-quarto/scripts/build_evidence_map.py \
 uv run ../../ma-manuscript-quarto/scripts/init_result_claims.py \
   --root ../.. \
   --out 07_manuscript/result_claims.csv
-Render will fail if any claim is missing `effect_estimate`, `ci`, or `p_value`.
+Render will fail if any claim is missing `effect_estimate`, `ci`, `p_value`, or `citation_keys`.
+Fill `citation_keys` as comma-separated BibTeX keys (e.g., `smith2020,doe2019`).
 
 uv run ../../ma-manuscript-quarto/scripts/build_result_paragraphs.py \
   --claims 07_manuscript/result_claims.csv \
   --out 07_manuscript/result_paragraphs.md
-This also writes `07_manuscript/result_paragraphs.qmd`.
+This also writes `07_manuscript/result_paragraphs.qmd` and `07_manuscript/result_summary_table.md`.
 
 uv run ../../ma-manuscript-quarto/scripts/assemble_results.py \
   --results 07_manuscript/03_results.qmd \
   --paragraphs 07_manuscript/result_paragraphs.qmd
+This also inserts `result_summary_table.md` into `03_results.qmd`.
+
+uv run ../../ma-manuscript-quarto/scripts/results_consistency_report.py \
+  --root ../.. \
+  --out 09_qa/results_consistency_report.md \
+  --strict
 
 uv run ../../ma-manuscript-quarto/scripts/insert_traceability_table.py \
   --root ../.. --round round-01 \
@@ -241,6 +261,10 @@ uv run ../../ma-publication-quality/scripts/crossref_check.py \
   --manuscript-dir ../../07_manuscript \
   --figures-dir ../../06_analysis/figures \
   --out ../../09_qa/crossref_report.md
+
+# Hash artifacts for reproducibility audit
+uv run ../../ma-end-to-end/scripts/hash_artifacts.py \
+  --root ../.. --out 09_qa/artifact_hashes.json
 ```
 
 </details>

@@ -9,28 +9,30 @@ from pathlib import Path
 
 START = "<!-- RESULT_PARAGRAPHS_START -->"
 END = "<!-- RESULT_PARAGRAPHS_END -->"
+SUMMARY_START = "<!-- RESULT_SUMMARY_TABLE_START -->"
+SUMMARY_END = "<!-- RESULT_SUMMARY_TABLE_END -->"
 
 
-def insert_block(results_text: str, block: str) -> str:
-    if START in results_text and END in results_text:
-        prefix = results_text.split(START)[0]
-        suffix = results_text.split(END)[1]
-        return prefix + START + "\n" + block + "\n" + END + suffix
+def insert_block(results_text: str, block: str, start: str, end: str, marker: str) -> str:
+    if start in results_text and end in results_text:
+        prefix = results_text.split(start)[0]
+        suffix = results_text.split(end)[1]
+        return prefix + start + "\n" + block + "\n" + end + suffix
 
-    marker = "## Quantitative Synthesis"
     if marker in results_text:
         parts = results_text.split(marker)
         head = parts[0] + marker
         tail = marker.join(parts[1:])
-        return head + "\n\n" + START + "\n" + block + "\n" + END + "\n" + tail
+        return head + "\n\n" + start + "\n" + block + "\n" + end + "\n" + tail
 
-    return results_text.rstrip() + "\n\n" + START + "\n" + block + "\n" + END + "\n"
+    return results_text.rstrip() + "\n\n" + start + "\n" + block + "\n" + end + "\n"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Assemble Results section.")
     parser.add_argument("--results", default="07_manuscript/03_results.qmd", help="Results QMD path")
     parser.add_argument("--paragraphs", default="07_manuscript/result_paragraphs.qmd", help="Paragraphs QMD path")
+    parser.add_argument("--summary-table", default="07_manuscript/result_summary_table.md", help="Summary table path")
     args = parser.parse_args()
 
     results_path = Path(args.results)
@@ -41,7 +43,12 @@ def main() -> None:
         raise SystemExit(f"Missing paragraphs file: {paragraphs_path}")
 
     block = paragraphs_path.read_text().strip()
-    updated = insert_block(results_path.read_text(), block)
+    updated = insert_block(results_path.read_text(), block, START, END, "## Quantitative Synthesis")
+
+    summary_path = Path(args.summary_table)
+    if summary_path.exists():
+        summary_block = summary_path.read_text().strip()
+        updated = insert_block(updated, summary_block, SUMMARY_START, SUMMARY_END, "## Quantitative Synthesis")
     results_path.write_text(updated + "\n")
 
 

@@ -19,6 +19,12 @@ cd tooling/python && uv init
 
 That's it. Claude will handle the rest.
 
+**Don't have a topic yet?** Say:
+
+> **"Help me brainstorm a topic"**
+
+Claude will guide you through an interactive session to develop your research question.
+
 ---
 
 ## What Claude Does

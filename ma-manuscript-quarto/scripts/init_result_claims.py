@@ -46,6 +46,7 @@ def main() -> None:
                 "figure_ref": f"../06_analysis/figures/{fig.name}",
                 "table_ref": "",
                 "data_source": "figure",
+                "citation_keys": "",
                 "notes": "",
             }
         )
@@ -67,6 +68,7 @@ def main() -> None:
                 "figure_ref": "",
                 "table_ref": f"../06_analysis/tables/{tbl.name}",
                 "data_source": "table",
+                "citation_keys": "",
                 "notes": "",
             }
         )
@@ -86,6 +88,7 @@ def main() -> None:
         "figure_ref",
         "table_ref",
         "data_source",
+        "citation_keys",
         "notes",
     ]
 

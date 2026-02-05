@@ -29,8 +29,10 @@ Create a Quarto manuscript with standard IMRaD sections and render to PDF and HT
 - `07_manuscript/result_claims.csv`
 - `07_manuscript/result_paragraphs.md`
 - `07_manuscript/result_paragraphs.qmd`
+- `07_manuscript/result_summary_table.md` (auto-inserted into Results)
 - `07_manuscript/traceability_table.md`
 - `07_manuscript/03_results.qmd` (assembled)
+- `09_qa/results_consistency_report.md`
 
 ## Workflow
 1. Initialize a Quarto project in `07_manuscript/`.
@@ -43,9 +45,10 @@ Create a Quarto manuscript with standard IMRaD sections and render to PDF and HT
 8. Initialize `result_claims.csv` with `scripts/init_result_claims.py` and draft Results from it.
 9. Generate Results paragraph stubs with `scripts/build_result_paragraphs.py`.
 10. Insert the traceability table into Methods with `scripts/insert_traceability_table.py`.
-11. Assemble Results into `03_results.qmd` with `scripts/assemble_results.py`.
+11. Assemble Results into `03_results.qmd` with `scripts/assemble_results.py` (also inserts `result_summary_table.md`).
 12. Populate the bibliography and ensure citation keys match.
-13. Render to PDF and HTML with `scripts/render_manuscript.py` (blocks if checklists incomplete).
+13. Generate a results consistency report with `scripts/results_consistency_report.py`.
+14. Render to PDF and HTML with `scripts/render_manuscript.py` (blocks if checklists incomplete).
 
 ## Discussion Guidance
 - Interpret the main effect estimates and clinical or practical significance.
@@ -59,9 +62,11 @@ Create a Quarto manuscript with standard IMRaD sections and render to PDF and HT
 - `scripts/insert_search_report.py` injects search report content into Methods.
 - `scripts/build_evidence_map.py` creates a checklist of outputs to base writing on.
 - `scripts/init_result_claims.py` seeds a results-to-evidence table for drafting.
-- `scripts/build_result_paragraphs.py` creates paragraph stubs for Results writing.
+- `scripts/build_result_paragraphs.py` creates paragraph stubs and a summary table for Results writing.
 - `scripts/insert_traceability_table.py` inserts a protocol→search→screening→inclusion table into Methods.
+- The traceability narrative is auto-inserted into `02_methods.qmd` near Study Selection.
 - `scripts/assemble_results.py` injects result paragraphs into `03_results.qmd`.
+- `scripts/results_consistency_report.py` checks claim/output/citation consistency.
 - `scripts/render_manuscript.py` validates checklists before rendering.
 
 ## Validation
@@ -72,3 +77,6 @@ Create a Quarto manuscript with standard IMRaD sections and render to PDF and HT
 - Verify `07_manuscript/traceability_table.md` is inserted into `02_methods.qmd`.
 - Ensure each claim includes effect estimate, confidence interval, and p-value.
 - Ensure `03_results.qmd` contains all claim IDs and their figure/table refs.
+- Ensure `09_qa/results_consistency_report.md` has no missing items.
+- Ensure each claim includes `citation_keys` and the citations appear in Results.
+Note: `citation_keys` should be comma-separated BibTeX keys present in `07_manuscript/references.bib`.

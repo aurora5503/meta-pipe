@@ -17,6 +17,36 @@ def read_claims(path: Path) -> List[Dict[str, str]]:
         return [{k: (v or "").strip() for k, v in row.items()} for row in reader]
 
 
+def parse_claim_ids(text: str) -> List[str]:
+    ids = []
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("## "):
+            ids.append(line.replace("## ", "").strip())
+    return ids
+
+
+def parse_citation_keys(raw: str) -> List[str]:
+    if not raw:
+        return []
+    keys = []
+    for token in raw.split(","):
+        token = token.strip()
+        if not token:
+            continue
+        if token.startswith("@"):
+            token = token[1:]
+        keys.append(token)
+    return keys
+
+
+def format_citations(raw: str) -> str:
+    keys = parse_citation_keys(raw)
+    if not keys:
+        return ""
+    return "(" + "; ".join(f"@{k}" for k in keys) + ")"
+
+
 def build_section(row: Dict[str, str]) -> List[str]:
     claim_id = row.get("claim_id", "")
     lines = [f"### {claim_id}", ""]
@@ -31,6 +61,7 @@ def build_section(row: Dict[str, str]) -> List[str]:
     lines.append(f"- Direction: {row.get('direction', '')}")
     lines.append(f"- Figure ref: {row.get('figure_ref', '')}")
     lines.append(f"- Table ref: {row.get('table_ref', '')}")
+    lines.append(f"- Citation keys: {row.get('citation_keys', '')}")
     lines.append("")
     lines.append("Draft paragraph:")
     lines.append(
@@ -61,6 +92,9 @@ def build_section(row: Dict[str, str]) -> List[str]:
         parts.append(f"({ci})")
     if p_value:
         parts.append(f"(p={p_value})")
+    citations = format_citations(row.get("citation_keys", ""))
+    if citations:
+        parts.append(citations)
     if model:
         parts.append(f"using a {model} model")
     sentence = " ".join(parts).strip()
@@ -84,6 +118,7 @@ def main() -> None:
     parser.add_argument("--claims", default="07_manuscript/result_claims.csv", help="Claims CSV")
     parser.add_argument("--out", default="07_manuscript/result_paragraphs.md", help="Output markdown")
     parser.add_argument("--out-qmd", default="07_manuscript/result_paragraphs.qmd", help="Output Quarto snippet")
+    parser.add_argument("--out-summary", default="07_manuscript/result_summary_table.md", help="Summary table output")
     args = parser.parse_args()
 
     claims = read_claims(Path(args.claims))
@@ -124,10 +159,13 @@ def main() -> None:
             parts.append(f"the pooled effect was {estimate}")
         if ci:
             parts.append(f"({ci})")
-        if p_value:
-            parts.append(f"(p={p_value})")
-        if model:
-            parts.append(f"using a {model} model")
+    if p_value:
+        parts.append(f"(p={p_value})")
+    citations = format_citations(row.get("citation_keys", ""))
+    if citations:
+        parts.append(citations)
+    if model:
+        parts.append(f"using a {model} model")
         sentence = " ".join(parts).strip()
         if sentence:
             sentence = sentence.rstrip(".") + "."
@@ -146,6 +184,28 @@ def main() -> None:
     qmd_path = Path(args.out_qmd)
     qmd_path.parent.mkdir(parents=True, exist_ok=True)
     qmd_path.write_text("\n".join(qmd_lines) + "\n")
+
+    # Sanity: ensure each claim ID appears in QMD
+    qmd_ids = set(parse_claim_ids("\n".join(qmd_lines)))
+    missing_ids = [row.get("claim_id", "") for row in claims if row.get("claim_id", "") not in qmd_ids]
+    if missing_ids:
+        raise SystemExit("Missing claim IDs in result_paragraphs.qmd: " + ", ".join(missing_ids))
+
+    summary_lines = [
+        "# Results Summary Table",
+        "",
+        "| Claim ID | Outcome | Effect | CI | p-value | I2 | Ref | Citations |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for row in claims:
+        ref = row.get("figure_ref", "") or row.get("table_ref", "")
+        citations = "; ".join(f"@{k}" for k in parse_citation_keys(row.get("citation_keys", "")))
+        summary_lines.append(
+            f"| {row.get('claim_id','')} | {row.get('outcome','')} | {row.get('effect_estimate','')} | {row.get('ci','')} | {row.get('p_value','')} | {row.get('heterogeneity_i2','')} | {ref} | {citations} |"
+        )
+    summary_path = Path(args.out_summary)
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("\n".join(summary_lines) + "\n")
 
 
 if __name__ == "__main__":

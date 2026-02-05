@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Tuple
 
 START = "<!-- TRACEABILITY_TABLE_START -->"
 END = "<!-- TRACEABILITY_TABLE_END -->"
+NARR_START = "<!-- TRACEABILITY_NARRATIVE_START -->"
+NARR_END = "<!-- TRACEABILITY_NARRATIVE_END -->"
 
 
 def read_kv(path: Path, key: str) -> Optional[int]:
@@ -103,8 +105,6 @@ def build_table(root: Path, round_name: str, decisions_column: str) -> tuple[str
     ]
     for stage, artifact, count, source in rows:
         lines.append(f"| {stage} | {artifact} | {count} | `{source}` |")
-    paragraph = build_methods_paragraph(rows)
-    lines.extend(["", "### Traceability Narrative", "", paragraph])
     return "\n".join(lines), rows
 
 
@@ -134,10 +134,25 @@ def build_methods_paragraph(rows: List[tuple]) -> str:
     return " ".join(parts)
 
 
-def insert_block(methods_text: str, block: str) -> str:
+def insert_narrative(text: str, narrative: str, insert_before: str) -> str:
+    if NARR_START in text and NARR_END in text:
+        prefix = text.split(NARR_START)[0]
+        suffix = text.split(NARR_END)[1]
+        return prefix + NARR_START + "\n" + narrative + "\n" + NARR_END + suffix
+    if insert_before in text:
+        parts = text.split(insert_before)
+        head = parts[0]
+        tail = insert_before.join(parts[1:])
+        block = NARR_START + "\n" + narrative + "\n" + NARR_END + "\n\n"
+        return head + block + insert_before + tail
+    return text + "\n" + NARR_START + "\n" + narrative + "\n" + NARR_END + "\n"
+
+
+def insert_block(methods_text: str, block: str, narrative: str) -> str:
     if START in methods_text and END in methods_text:
-        prefix = methods_text.split(START)[0]
-        suffix = methods_text.split(END)[1]
+        updated = insert_narrative(methods_text, narrative, START)
+        prefix = updated.split(START)[0]
+        suffix = updated.split(END)[1]
         return prefix + START + "\n" + block + "\n" + END + suffix
 
     marker = "## Study Selection"
@@ -145,7 +160,10 @@ def insert_block(methods_text: str, block: str) -> str:
         parts = methods_text.split(marker)
         head = parts[0] + marker
         tail = marker.join(parts[1:])
-        return head + "\n\n" + START + "\n" + block + "\n" + END + "\n" + tail
+        updated = head + "\n\n" + START + "\n" + block + "\n" + END + "\n" + tail
+        if narrative:
+            updated = insert_narrative(updated, narrative, START)
+        return updated
 
     return methods_text.rstrip() + "\n\n" + START + "\n" + block + "\n" + END + "\n"
 
@@ -161,6 +179,7 @@ def main() -> None:
 
     root = Path(args.root).resolve()
     block, rows = build_table(root, args.round, args.decisions_column)
+    narrative = build_methods_paragraph(rows)
 
     out_table = root / args.out_table
     out_table.parent.mkdir(parents=True, exist_ok=True)
@@ -169,7 +188,7 @@ def main() -> None:
     methods_path = root / args.methods
     if not methods_path.exists():
         raise SystemExit(f"Missing methods file: {methods_path}")
-    updated = insert_block(methods_path.read_text(), block)
+    updated = insert_block(methods_path.read_text(), block, narrative)
     methods_path.write_text(updated + "\n")
 
 

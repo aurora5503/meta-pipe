@@ -16,7 +16,9 @@
 - [ ] `result_claims.csv` generated and filled
 - [ ] `result_paragraphs.md` generated
 - [ ] `result_paragraphs.qmd` generated
+- [ ] `result_summary_table.md` generated
 - [ ] `traceability_table.md` generated and inserted into `02_methods.qmd`
 - [ ] `03_results.qmd` assembled from `result_paragraphs.qmd`
+- [ ] Result summary table inserted into `03_results.qmd`
 - [ ] `manuscript.pdf` rendered
 - [ ] `manuscript.html` rendered
