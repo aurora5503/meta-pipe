@@ -86,6 +86,24 @@ Only ask if information is missing from TOPIC.txt:
 ## Commands Reference
 
 <details>
+<summary><strong>Stage 01: Protocol & PROSPERO</strong></summary>
+
+```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# Generate PROSPERO registration document from pico.yaml
+uv add pyyaml
+uv run generate_prospero_protocol.py \
+  --pico ../../01_protocol/pico.yaml \
+  --out ../../01_protocol/prospero_registration.md
+```
+
+Review the generated document, edit as needed, then submit to PROSPERO.
+Update `prospero_id` in `pico.yaml` once registered.
+
+</details>
+
+<details>
 <summary><strong>Stage 02: Search</strong></summary>
 
 ```bash
@@ -149,11 +167,32 @@ uv run ../../ma-search-bibliography/scripts/zotero_sync.py \
 </details>
 
 <details>
+<summary><strong>Stage 02→03: BibTeX to CSV Conversion</strong></summary>
+
+```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# Convert BibTeX to CSV for screening
+uv run bib_to_csv.py \
+  --in-bib ../../02_search/round-01/dedupe.bib \
+  --out-csv ../../03_screening/round-01/decisions.csv
+```
+
+This creates a CSV with columns: `record_id, entry_type, authors, year, title, journal, abstract, doi, pmid, keywords, decision_r1, decision_r2, final_decision, exclusion_reason, notes`
+
+Fill in `decision_r1` and `decision_r2` columns during screening.
+
+</details>
+
+<details>
 <summary><strong>Stage 03: Screening</strong></summary>
 
 Required CSV columns: `record_id, title, decision_r1, decision_r2, final_decision, exclusion_reason`
 
 ```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# Dual-review agreement analysis
 uv run ../../ma-screening-quality/scripts/dual_review_agreement.py \
   --file ../../03_screening/round-01/decisions.csv \
   --col-a decision_r1 --col-b decision_r2 \
@@ -163,26 +202,148 @@ uv run ../../ma-screening-quality/scripts/dual_review_agreement.py \
 </details>
 
 <details>
+<summary><strong>Risk of Bias Assessment</strong></summary>
+
+```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# RoB 2 for RCTs
+uv run ../../ma-peer-review/scripts/init_rob2_assessment.py \
+  --extraction ../../05_extraction/round-01/extraction.csv \
+  --out-csv ../../03_screening/round-01/quality_rob2.csv \
+  --out-md ../../03_screening/round-01/rob2_assessment.md
+
+# ROBINS-I for cohort/observational studies
+uv run ../../ma-peer-review/scripts/init_robins_i_assessment.py \
+  --extraction ../../05_extraction/round-01/extraction.csv \
+  --out-csv ../../03_screening/round-01/quality_robins_i.csv \
+  --out-md ../../03_screening/round-01/robins_i_assessment.md
+```
+
+Templates: `ma-peer-review/references/rob2-template.md`, `ma-peer-review/references/robins-i-template.md`
+
+</details>
+
+<details>
 <summary><strong>Stage 04: Fulltext</strong></summary>
 
 ```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# Extract BibTeX subset for full-text review (from screening results)
+uv run ../../ma-search-bibliography/scripts/bib_subset_by_ids.py \
+  --in-csv ../../03_screening/round-01/decisions_screened.csv \
+  --in-bib ../../02_search/round-01/dedupe.bib \
+  --out-bib ../../04_fulltext/round-01/fulltext_subset.bib \
+  --filter-column final_decision \
+  --filter-value Include
+
+# Alternative: Extract ALL records for full-text (Include + Uncertain)
+uv run ../../ma-search-bibliography/scripts/bib_subset_by_ids.py \
+  --in-csv ../../04_fulltext/round-01/pdf_retrieval_manifest.csv \
+  --in-bib ../../02_search/round-01/dedupe.bib \
+  --out-bib ../../04_fulltext/round-01/fulltext_subset.bib
+
+# Query Unpaywall API for Open Access status
 uv run ../../ma-fulltext-management/scripts/unpaywall_fetch.py \
-  --in-bib ../../03_screening/round-01/included.bib \
-  --out-csv ../../04_fulltext/unpaywall_results.csv
+  --in-bib ../../04_fulltext/round-01/fulltext_subset.bib \
+  --out-csv ../../04_fulltext/round-01/unpaywall_results.csv \
+  --out-log ../../04_fulltext/round-01/unpaywall_fetch.log \
+  --email "your@email.com"
+
+# Analyze Unpaywall results
+uv run ../../ma-fulltext-management/scripts/analyze_unpaywall.py \
+  --in-csv ../../04_fulltext/round-01/unpaywall_results.csv \
+  --out-md ../../04_fulltext/round-01/unpaywall_summary.md
+
+# Download Open Access PDFs automatically
+uv run ../../ma-fulltext-management/scripts/download_oa_pdfs.py \
+  --in-csv ../../04_fulltext/round-01/unpaywall_results.csv \
+  --pdf-dir ../../04_fulltext/round-01/pdfs \
+  --out-log ../../04_fulltext/round-01/pdf_download.log \
+  --sleep 1 \
+  --max-retries 3
 ```
+
+**Expected results**:
+- 40-60% PDFs downloaded automatically (Gold/Green OA)
+- Remaining PDFs need manual retrieval via institutional access
+- See `unpaywall_summary.md` for retrieval statistics
 
 </details>
 
 <details>
 <summary><strong>Stage 05: Extraction</strong></summary>
 
+**Recommended: LLM-Assisted Extraction (using Claude CLI)**
+
+Requires: `claude` CLI (subscription) or `codex` CLI installed
+
 ```bash
+cd /Users/htlin/meta-pipe/tooling/python
+
+# Step 1: Extract PDF text
 uv add pdfplumber
+uv run extract_pdf_text.py \
+  --pdf-dir ../../04_fulltext/round-01/pdfs \
+  --out-jsonl ../../05_extraction/round-01/pdf_texts.jsonl \
+  --pattern "*.pdf"
+
+# Step 2: Create extraction template
+uv run create_extraction_template.py \
+  --pdf-jsonl ../../05_extraction/round-01/pdf_texts.jsonl \
+  --data-dict ../../05_extraction/data-dictionary.md \
+  --out-csv ../../05_extraction/round-01/extraction_template.csv
+
+# Step 3: Create LLM manifest
+uv run create_pdf_manifest.py \
+  --pdf-jsonl ../../05_extraction/round-01/pdf_texts.jsonl \
+  --out-csv ../../05_extraction/round-01/manifest.csv
+
+# Step 4: LLM extraction using Claude CLI (no API key needed)
+uv run llm_extract_cli.py \
+  --pdf-jsonl ../../05_extraction/round-01/pdf_texts.jsonl \
+  --data-dict ../../05_extraction/data-dictionary.md \
+  --out-jsonl ../../05_extraction/round-01/llm_extracted_all.jsonl \
+  --cli claude
+
+# Step 5: Convert to CSV format
+uv run jsonl_to_extraction_csv.py \
+  --jsonl ../../05_extraction/round-01/llm_extracted_all.jsonl \
+  --data-dict ../../05_extraction/data-dictionary.md \
+  --out-csv ../../05_extraction/round-01/extraction.csv
+
+# Step 6: Manual review and updates
+# (Edit extraction.csv manually to correct LLM errors)
+
+# Step 7: Update extraction with manual corrections
+uv run update_extraction_manual.py \
+  --llm-jsonl ../../05_extraction/round-01/llm_extracted_all.jsonl \
+  --manual-csv ../../05_extraction/round-01/extraction_manual.csv \
+  --out-csv ../../05_extraction/round-01/extraction.csv
+
+# Step 8: Validate extraction quality
+uv run validate_extraction.py \
+  --csv ../../05_extraction/round-01/extraction.csv \
+  --out-md ../../05_extraction/round-01/validation_report.md
+```
+
+**Expected results**:
+- 100% success rate (all PDFs processed)
+- 65-70% time savings vs manual extraction
+- Some missing fields will need manual review
+- See `validation_report.md` for data quality issues
+
+**Alternative: API-based extraction** (if CLI not available)
+
+```bash
 uv run ../../ma-data-extraction/scripts/llm_extract.py \
   --manifest ../../04_fulltext/manifest.csv \
   --data-dictionary ../../05_extraction/data-dictionary.md \
   --out-jsonl ../../05_extraction/llm_suggestions.jsonl
 ```
+
+Requires `LLM_API_BASE`, `LLM_API_KEY`, `LLM_MODEL` in `.env`
 
 </details>
 
