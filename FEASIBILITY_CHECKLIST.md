@@ -10,6 +10,7 @@
 ## ❗ Why This Matters
 
 **Lesson learned**: The CDK4/6i project spent 13 hours before discovering:
+
 - Only 2/10 studies had usable data
 - Studies were too heterogeneous to pool
 - Research question didn't match available literature
@@ -34,18 +35,21 @@
 ```
 
 **What to check**:
+
 - [ ] Number of results: ≥50 (good), 20-50 (marginal), <20 (warning)
 - [ ] Study types: Mostly RCTs/cohorts? Or reviews/case reports?
 - [ ] Publication dates: Recent (last 5 years)? Or outdated field?
 - [ ] Language: Mostly English? Or need translation?
 
 **Review 15 abstracts and note**:
+
 - Study designs (RCT, cohort, case series?)
 - Sample sizes (powered studies? Or small case series?)
 - Interventions compared (consistent? Or all different?)
 - Outcomes reported (HR/RR? Or just descriptive?)
 
 **Red flags** 🚩:
+
 - ❌ Mostly review articles (no original data)
 - ❌ Mostly case reports/series (can't pool)
 - ❌ All single-arm studies (no comparators)
@@ -58,23 +62,24 @@
 #### Task: Download and extract from 3 representative PDFs
 
 **Selection criteria**:
+
 1. Most recent study (represents current standards)
 2. Largest sample size (likely well-powered)
 3. Different intervention if available (assess heterogeneity)
 
 **What to extract manually**:
 
-| Field | Study 1 | Study 2 | Study 3 |
-|-------|---------|---------|---------|
-| Study design | | | |
-| Sample size (n) | | | |
-| Intervention | | | |
-| Comparator | | | |
-| Primary outcome | | | |
-| **HR/RR reported?** | Yes/No | Yes/No | Yes/No |
-| **95% CI reported?** | Yes/No | Yes/No | Yes/No |
-| **p-value reported?** | Yes/No | Yes/No | Yes/No |
-| Data location | Text/Table/Figure | | |
+| Field                 | Study 1           | Study 2 | Study 3 |
+| --------------------- | ----------------- | ------- | ------- |
+| Study design          |                   |         |         |
+| Sample size (n)       |                   |         |         |
+| Intervention          |                   |         |         |
+| Comparator            |                   |         |         |
+| Primary outcome       |                   |         |         |
+| **HR/RR reported?**   | Yes/No            | Yes/No  | Yes/No  |
+| **95% CI reported?**  | Yes/No            | Yes/No  | Yes/No  |
+| **p-value reported?** | Yes/No            | Yes/No  | Yes/No  |
+| Data location         | Text/Table/Figure |         |         |
 
 **Critical questions**:
 
@@ -104,27 +109,28 @@ Score each criterion: 2 (Good), 1 (Marginal), 0 (Poor)
 Minimum score to proceed: 12/16 (75%)
 ```
 
-| Criterion | Score (0-2) | Evidence | Notes |
-|-----------|-------------|----------|-------|
-| **1. Study quantity** | | | |
-| ≥15 studies (2), 10-14 (1), <10 (0) | | | |
-| **2. Study quality** | | | |
-| Mostly RCTs (2), Mixed (1), Mostly obs (0) | | | |
-| **3. Outcome reporting** | | | |
-| All report HR/RR (2), >50% (1), <50% (0) | | | |
-| **4. Clinical homogeneity** | | | |
-| Same comparison (2), Similar (1), Different (0) | | | |
-| **5. Population similarity** | | | |
-| Same disease/stage (2), Related (1), Different (0) | | | |
-| **6. Data extractability** | | | |
-| Easy to extract (2), Moderate (1), Difficult (0) | | | |
-| **7. Recent literature** | | | |
-| >50% in last 3 yrs (2), 3-5 yrs (1), Older (0) | | | |
-| **8. Precedent** | | | |
-| Similar MA exists (2), Related (1), None (0) | | | |
-| **TOTAL SCORE** | **/16** | | |
+| Criterion                                          | Score (0-2) | Evidence | Notes |
+| -------------------------------------------------- | ----------- | -------- | ----- |
+| **1. Study quantity**                              |             |          |       |
+| ≥15 studies (2), 10-14 (1), <10 (0)                |             |          |       |
+| **2. Study quality**                               |             |          |       |
+| Mostly RCTs (2), Mixed (1), Mostly obs (0)         |             |          |       |
+| **3. Outcome reporting**                           |             |          |       |
+| All report HR/RR (2), >50% (1), <50% (0)           |             |          |       |
+| **4. Clinical homogeneity**                        |             |          |       |
+| Same comparison (2), Similar (1), Different (0)    |             |          |       |
+| **5. Population similarity**                       |             |          |       |
+| Same disease/stage (2), Related (1), Different (0) |             |          |       |
+| **6. Data extractability**                         |             |          |       |
+| Easy to extract (2), Moderate (1), Difficult (0)   |             |          |       |
+| **7. Recent literature**                           |             |          |       |
+| >50% in last 3 yrs (2), 3-5 yrs (1), Older (0)     |             |          |       |
+| **8. Precedent**                                   |             |          |       |
+| Similar MA exists (2), Related (1), None (0)       |             |          |       |
+| **TOTAL SCORE**                                    | **/16**     |          |       |
 
 **Interpretation**:
+
 - **14-16 points**: ✅ **GO** - Excellent feasibility
 - **12-13 points**: ⚠️ **REVISE** - Feasible but needs PICO adjustment
 - **8-11 points**: 🚨 **RECONSIDER** - Major challenges expected
@@ -152,12 +158,14 @@ graph TD
 ```
 
 **If GO** ✅:
+
 - Document: "Feasibility assessment passed (score: X/16)"
 - Document key assumptions and limitations
 - Proceed to full protocol development
 - Expected completion: High confidence
 
 **If REVISE** ⚠️:
+
 - Identify: Which PICO element needs adjustment?
   - Population too narrow? (expand inclusion criteria)
   - Intervention too specific? (broaden drug class)
@@ -167,6 +175,7 @@ graph TD
 - Decision: GO if score improves to ≥14, STOP if not
 
 **If STOP** ❌:
+
 - Document: "Feasibility assessment failed (score: X/16)"
 - Document specific reasons (outcome reporting? heterogeneity?)
 - Archive work: Save search strategy and notes
@@ -196,11 +205,11 @@ graph TD
 
 ## Pilot Extraction Results
 
-| Criterion | Result | Assessment |
-|-----------|--------|------------|
-| HR/RR reported | X/3 studies | ✅ / ⚠️ / ❌ |
-| Clinical homogeneity | [Description] | ✅ / ⚠️ / ❌ |
-| Data extractability | [Avg time per study] | ✅ / ⚠️ / ❌ |
+| Criterion            | Result               | Assessment   |
+| -------------------- | -------------------- | ------------ |
+| HR/RR reported       | X/3 studies          | ✅ / ⚠️ / ❌ |
+| Clinical homogeneity | [Description]        | ✅ / ⚠️ / ❌ |
+| Data extractability  | [Avg time per study] | ✅ / ⚠️ / ❌ |
 
 ## Feasibility Score
 
@@ -220,17 +229,20 @@ graph TD
 [2-3 sentences explaining the decision]
 
 **If GO**:
+
 - Expected number of includable studies: [N]
 - Expected effect measure: [HR/RR/OR]
 - Anticipated challenges: [List]
 - Mitigation strategies: [List]
 
 **If REVISE**:
+
 - Problem identified: [Specific issue]
 - Proposed PICO revision: [New PICO]
 - Re-assessment planned: [Date]
 
 **If STOP**:
+
 - Fatal flaw: [Main reason]
 - Alternative topics to consider: [List]
 - Knowledge gained: [What we learned]
@@ -243,12 +255,14 @@ graph TD
 ### Standard Pairwise Meta-Analysis
 
 **Minimum requirements**:
+
 - ✅ ≥5 studies with comparable interventions
 - ✅ ≥80% report same outcome measure (HR/RR/OR)
 - ✅ Similar populations (same disease/stage)
 - ✅ Extractable quantitative data
 
 **Red flags**:
+
 - ❌ <3 studies (too few for meaningful pooling)
 - ❌ All different comparators (no common comparison)
 - ❌ Mostly single-arm studies (no effect sizes)
@@ -256,12 +270,14 @@ graph TD
 ### Network Meta-Analysis
 
 **Minimum requirements**:
+
 - ✅ ≥10 studies forming connected network
 - ✅ ≥3 different interventions compared
 - ✅ Transitivity assumption plausible
 - ✅ Sufficient data for each comparison
 
 **Red flags**:
+
 - ❌ Disconnected network (isolated comparisons)
 - ❌ High heterogeneity across comparisons
 - ❌ Insufficient studies per comparison node
@@ -269,11 +285,13 @@ graph TD
 ### Individual Patient Data (IPD) Meta-Analysis
 
 **Minimum requirements**:
+
 - ✅ Contact information for study authors available
 - ✅ Studies published within last 10 years
 - ✅ IPD sharing feasible (willing authors, no restrictions)
 
 **Red flags**:
+
 - ❌ Authors unresponsive or data unavailable
 - ❌ Proprietary/commercial trials (unlikely to share)
 - ❌ Inconsistent data formats across studies
@@ -326,6 +344,7 @@ graph TD
 ## 📊 Example: CDK4/6i Project Post-Mortem
 
 **What we actually found** (after 13 hours):
+
 - 10 PDFs downloaded
 - 6 potentially includable (4 reviews/protocols excluded)
 - Only 2/6 had usable HR data
@@ -335,18 +354,21 @@ graph TD
 **What feasibility assessment would have revealed** (in 4 hours):
 
 ### Hour 1: Literature scan
+
 - Found: Mostly review articles and protocols
 - Found: Few RCTs of CDK4/6i continuation
 - Found: Studies compare different agents (AKT inhibitors, chemotherapy)
 - **Red flag identified**: Insufficient original research
 
 ### Hour 2: Pilot extraction (3 PDFs)
+
 - Study 1: Review article (no original data)
 - Study 2: Protocol (no results yet)
 - Study 3: Observational study (no HR reported)
 - **Fatal flaw identified**: 0/3 report quantitative effect sizes
 
 ### Hour 3: Feasibility score
+
 - Study quantity: 0/2 (only 6 original studies)
 - Study quality: 1/2 (mixed RCT/observational)
 - Outcome reporting: 0/2 (<50% report HR)
@@ -354,6 +376,7 @@ graph TD
 - **Total: 3/16** → **STOP**
 
 ### Hour 4: Decision
+
 - **STOP**: Not feasible for quantitative meta-analysis
 - **Alternative**: Consider narrative review or choose different topic
 - **Time saved**: 9+ hours of extraction work avoided
@@ -402,12 +425,14 @@ Day 4: Select new research question
 **ROI**: 250-1000%
 
 **What you get**:
+
 - ✅ Confidence the question is answerable
 - ✅ Realistic timeline and expectations
 - ✅ Early identification of challenges
 - ✅ Ability to pivot before significant investment
 
 **What you avoid**:
+
 - ❌ Weeks of work on unanswerable questions
 - ❌ Discovering problems after data extraction
 - ❌ Incomplete projects with no publication
@@ -418,11 +443,13 @@ Day 4: Select new research question
 ## 📚 Additional Resources
 
 **For different study types**:
+
 - Cochrane Handbook: "Assessing feasibility" (Chapter 2)
 - PRISMA-P: Protocol requirements for feasibility
 - JBI Manual: Feasibility assessment for different review types
 
 **Tools**:
+
 - PubMed Clinical Queries (pre-filtered searches)
 - Rayyan (quick abstract screening)
 - Research Rabbit (literature mapping)

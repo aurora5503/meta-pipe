@@ -16,6 +16,7 @@ Even though this project didn't reach the meta-analysis stage, we gained **treme
 **The root cause of this project's incompletion**: No upfront feasibility assessment of the research question.
 
 We spent 13 hours developing tools and extracting data before discovering:
+
 - Only 2/10 studies had usable outcome data
 - Studies were clinically heterogeneous
 - Research question didn't match available literature
@@ -41,6 +42,7 @@ We spent 13 hours developing tools and extracting data before discovering:
    - Decide: Proceed / Revise / Stop
 
 **Impact if we'd done this**:
+
 - ✅ Would have identified insufficient data in week 1
 - ✅ Could have revised PICO or chosen different topic
 - ✅ Would have saved 9+ hours of extraction work
@@ -512,11 +514,13 @@ Before extracting all studies:
 **This was the single biggest mistake** - all other issues stemmed from this.
 
 If we had done feasibility assessment:
+
 1. Week 1: Identify problem → revise PICO or choose new topic
 2. Week 2-3: Execute revised project → reach completion
 3. Result: Publishable meta-analysis instead of incomplete project
 
 **New mandatory workflow**:
+
 ```
 Day 1: PICO draft
 Day 2-3: Feasibility pilot (4 hours)
