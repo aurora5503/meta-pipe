@@ -12,6 +12,7 @@
 ### For First-Time Reviewers
 
 **Start here** → `00_overview/FINAL_PROJECT_SUMMARY.md` (13.7 KB)
+
 - Complete project overview
 - Key findings summary
 - All efficacy and safety results
@@ -20,6 +21,7 @@
 ### For Manuscript Review
 
 **Manuscript sections** → `07_manuscript/`
+
 1. `00_abstract.md` (396 words)
 2. `01_introduction.md` (689 words)
 3. `02_methods.md` (1,141 words)
@@ -48,21 +50,21 @@
 
 ### Secondary Outcomes
 
-| Outcome | Effect (95% CI) | p-value | I² | Quality | Absolute Benefit | NNT |
-|---------|-----------------|---------|----|---------|--------------------|-----|
-| **EFS (5y)** | HR 0.66 (0.51-0.86) | 0.021 | 0% | ⊕⊕⊕◯ MODERATE | +9.2% | 11 |
-| **OS (5y)** | HR 0.48* (0.00-128.74) | 0.346 | - | ⊕⊕◯◯ LOW | +9.3% | 11 |
+| Outcome      | Effect (95% CI)         | p-value | I²  | Quality       | Absolute Benefit | NNT |
+| ------------ | ----------------------- | ------- | --- | ------------- | ---------------- | --- |
+| **EFS (5y)** | HR 0.66 (0.51-0.86)     | 0.021   | 0%  | ⊕⊕⊕◯ MODERATE | +9.2%            | 11  |
+| **OS (5y)**  | HR 0.48\* (0.00-128.74) | 0.346   | -   | ⊕⊕◯◯ LOW      | +9.3%            | 11  |
 
 \*k=2 trials, both individually significant (p<0.01)
 
 ### Safety Profile
 
-| Adverse Event | ICI Group | Control | RR (95% CI) | NNH |
-|---------------|-----------|---------|-------------|-----|
-| Serious AE | 29.5% | 19.6% | 1.50 (1.13-1.98) | 10 |
-| Grade 3+ irAE | 13.0% | 1.5% | ~8.5 | 9 |
-| Discontinuation | 27.6% | 14.1% | ~2.0 | 7 |
-| Fatal AE | 0.40% | 0% | - | 250 |
+| Adverse Event   | ICI Group | Control | RR (95% CI)      | NNH |
+| --------------- | --------- | ------- | ---------------- | --- |
+| Serious AE      | 29.5%     | 19.6%   | 1.50 (1.13-1.98) | 10  |
+| Grade 3+ irAE   | 13.0%     | 1.5%    | ~8.5             | 9   |
+| Discontinuation | 27.6%     | 14.1%   | ~2.0             | 7   |
+| Fatal AE        | 0.40%     | 0%      | -                | 250 |
 
 ### Benefit-Risk Assessment
 
@@ -223,6 +225,7 @@ projects/ici-breast-cancer/
 **Skills Created**: `~/.claude/skills/meta-manuscript-assembly/`
 
 **Key Contributors**:
+
 - Protocol development: Claude Agent
 - Data extraction: Claude Agent (LLM-assisted)
 - Meta-analysis: R (meta, metafor packages)
@@ -233,17 +236,17 @@ projects/ici-breast-cancer/
 
 ## 📊 Project Metrics
 
-| Metric | Value |
-|--------|-------|
-| **Completion** | 99% |
-| **Total time invested** | ~14 hours |
-| **Trials included** | 5 RCTs |
-| **Patients analyzed** | N=2402 |
-| **Primary outcome quality** | ⊕⊕⊕⊕ HIGH |
-| **Manuscript word count** | 4,921 words |
-| **References** | 31 citations |
-| **Tables** | 7 (3 main + 4 supplementary) |
-| **Figures planned** | 5 (3 main + 2 supplementary) |
+| Metric                      | Value                        |
+| --------------------------- | ---------------------------- |
+| **Completion**              | 99%                          |
+| **Total time invested**     | ~14 hours                    |
+| **Trials included**         | 5 RCTs                       |
+| **Patients analyzed**       | N=2402                       |
+| **Primary outcome quality** | ⊕⊕⊕⊕ HIGH                    |
+| **Manuscript word count**   | 4,921 words                  |
+| **References**              | 31 citations                 |
+| **Tables**                  | 7 (3 main + 4 supplementary) |
+| **Figures planned**         | 5 (3 main + 2 supplementary) |
 
 ---
 
