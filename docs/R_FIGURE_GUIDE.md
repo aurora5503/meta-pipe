@@ -296,11 +296,13 @@ ggsave("figures/treatment_effect.png", width = 10, height = 6, dpi = 300)
 
 ### 1. Forest Plots (Primary Outcome)
 
-**Using metafor package**:
+**Using metafor with professional themes**:
 
 ```r
 library(metafor)
 library(meta)
+library(ggplot2)
+library(ggsci)
 
 # Load extraction data
 data <- read.csv("05_extraction/extraction.csv")
@@ -319,22 +321,59 @@ res <- metabin(
   random = TRUE
 )
 
-# Create forest plot
+# Create forest plot with Lancet colors
 png("07_manuscript/figures/figure1_forest.png",
     width = 10, height = 8, units = "in", res = 300)
+
+# Use Lancet color palette (professional medical journal style)
+lancet_colors <- pal_lancet()(2)  # Get 2 colors from Lancet palette
 
 forest(res,
        xlim = c(0.5, 2.0),
        xlab = "Risk Ratio",
        slab = data$study_id,
-       col.square = "blue",
-       col.diamond = "red",
+       col.square = lancet_colors[1],    # Lancet blue
+       col.diamond = lancet_colors[2],   # Lancet red
        comb.fixed = FALSE,
        comb.random = TRUE,
        print.I2 = TRUE,
        print.pval.Q = TRUE)
 
 dev.off()
+```
+
+**Alternative: Using ggplot2 forest plot with hrbrthemes**:
+
+```r
+library(ggplot2)
+library(hrbrthemes)
+library(ggsci)
+
+# Create custom forest plot data
+forest_data <- data.frame(
+  study = data$study_id,
+  rr = exp(res$TE),
+  ci_lower = exp(res$TE - 1.96 * res$seTE),
+  ci_upper = exp(res$TE + 1.96 * res$seTE),
+  weight = res$w.random
+)
+
+# Create ggplot forest plot with professional theme
+p <- ggplot(forest_data, aes(x = rr, y = study)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "gray50") +
+  geom_point(aes(size = weight), color = pal_lancet()(1)) +
+  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
+  scale_x_log10() +
+  theme_ipsum_rc() +
+  labs(
+    title = "Forest Plot: Pathologic Complete Response",
+    x = "Risk Ratio (95% CI)",
+    y = NULL,
+    size = "Weight"
+  )
+
+ggsave("07_manuscript/figures/figure1_forest_ggplot.png",
+       width = 10, height = 8, dpi = 300)
 ```
 
 **Using forest() from meta package**:
@@ -477,6 +516,59 @@ ggsave("07_manuscript/figures/figure4_rob.png",
 ---
 
 ## Best Practices
+
+### Theme Selection Guide
+
+**Choose theme based on target journal**:
+
+| Journal Type | Recommended Theme | Color Palette | Reason |
+|-------------|------------------|---------------|--------|
+| Nature, Science, Cell | hrbrthemes + ggsci | `scale_color_npg()` | Professional typography, journal colors |
+| Lancet, NEJM, JAMA | hrbrthemes | `scale_color_lancet()` | Medical journal standards |
+| PLOS ONE | ggthemr("fresh") | viridis | Open access, colorblind-safe required |
+| Oncology journals | hrbrthemes | `scale_color_jco()` | Specialty palette |
+| Any journal (safe choice) | hrbrthemes + viridis | `scale_color_viridis_d()` | Accessible, professional |
+
+**Meta-analysis specific recommendations**:
+
+```r
+library(ggplot2)
+library(hrbrthemes)
+library(ggsci)
+
+# Set up once at start of script
+theme_set(theme_ipsum_rc(base_size = 12))  # Consistent theme for all plots
+
+# For forest plots (categorical outcomes)
+scale_color_lancet()  # Clear distinction between studies
+
+# For funnel plots (continuous)
+scale_color_viridis_c(option = "plasma")  # Publication bias gradient
+
+# For subgroup analysis
+scale_fill_jco()  # Multiple subgroups need distinct colors
+```
+
+### Color Palette Decision Tree
+
+```
+Need colors?
+├─ Continuous variable (e.g., p-value, effect size)
+│  └─ Use viridis or scico (colorblind-safe)
+│     └─ ggplot(...) + scale_color_viridis_c()
+│
+├─ Categorical groups (2-8 groups)
+│  ├─ Medical journal submission?
+│  │  └─ Use ggsci journal palette
+│  │     └─ scale_color_nejm() or scale_color_lancet()
+│  └─ General publication?
+│     └─ Use viridis discrete
+│        └─ scale_color_viridis_d()
+│
+└─ Heatmap or intensity plot
+   └─ Use scico or viridis
+      └─ scale_fill_scico(palette = "bilbao")
+```
 
 ### Export Settings
 
@@ -687,8 +779,50 @@ install.packages(c("meta", "metafor", "dmetar"))
 # Visualization
 install.packages(c("ggplot2", "patchwork", "cowplot", "ggpubr"))
 
+# Professional themes (RECOMMENDED for all projects)
+install.packages(c(
+  "hrbrthemes",   # Best typography
+  "ggthemes",     # Professional themes
+  "viridis",      # Colorblind-safe (MANDATORY)
+  "scico",        # Scientific colormaps
+  "ggsci"         # Journal palettes
+))
+
+# Install ggthemr from GitHub
+# devtools::install_github("Mikata-Project/ggthemr")
+
+# Optional: TV themes (for presentations only)
+# devtools::install_github("Ryo-N7/tvthemes")
+
 # Utilities
 install.packages(c("tidyverse", "scales", "RColorBrewer"))
+```
+
+### Theme Setup Template
+
+**Copy this to the start of every analysis script**:
+
+```r
+#!/usr/bin/env Rscript
+# Setup: Load packages and set theme
+
+# Load packages
+library(ggplot2)
+library(hrbrthemes)  # Typography
+library(ggsci)       # Journal colors
+library(viridis)     # Colorblind-safe
+library(patchwork)   # Multi-panel
+
+# Set global theme for ALL plots
+theme_set(
+  theme_ipsum_rc(
+    base_size = 12,           # Readable text
+    axis_title_size = 14,
+    plot_title_size = 16
+  )
+)
+
+# Now all ggplot objects inherit this theme automatically
 ```
 
 ### Template: Basic Forest Plot
@@ -769,6 +903,204 @@ help(package = "meta")
 vignette(package = "meta")
 browseVignettes("meta")
 ```
+
+---
+
+## Theme & Color Package Comparison
+
+### When to Use Each Package
+
+| Package | Best For | Pros | Cons | Install |
+|---------|---------|------|------|---------|
+| **hrbrthemes** | All publications | Professional typography, minimal design | Requires font installation | CRAN |
+| **ggthemr** | Quick styling | One-line setup, applies globally | Limited customization | GitHub |
+| **ggthemes** | Matching specific styles | Economist, WSJ, Tufte themes | Some themes too stylized | CRAN |
+| **viridis** | Color scales | Colorblind-safe, perceptually uniform | Limited to continuous scales | CRAN |
+| **scico** | Heatmaps | Scientific colormaps, 30+ palettes | Overkill for simple plots | CRAN |
+| **ggsci** | Medical journals | Exact journal color matching | Only discrete colors | CRAN |
+| **tvthemes** | Presentations | Fun, eye-catching | Not professional enough for publication | GitHub |
+
+### Complete Setup Example
+
+**Master script for all meta-analysis figures**:
+
+```r
+#!/usr/bin/env Rscript
+# master_figures.R — Generate all publication figures
+
+# ============================================================
+# SETUP: Load all packages
+# ============================================================
+
+library(meta)         # Meta-analysis
+library(metafor)      # Advanced meta-analysis
+library(ggplot2)      # Plotting
+library(patchwork)    # Multi-panel
+library(hrbrthemes)   # Professional theme
+library(ggsci)        # Journal colors
+library(viridis)      # Colorblind-safe
+library(dplyr)        # Data manipulation
+
+# ============================================================
+# THEME CONFIGURATION
+# ============================================================
+
+# Set global theme for consistency
+theme_set(
+  theme_ipsum_rc(
+    base_size = 12,
+    axis_title_size = 14,
+    plot_title_size = 16,
+    strip_text_size = 12
+  ) +
+  theme(
+    legend.position = "bottom",
+    plot.title.position = "plot"
+  )
+)
+
+# ============================================================
+# COLOR PALETTES
+# ============================================================
+
+# Define palettes for consistency
+colors_lancet <- pal_lancet()(9)      # For categorical (up to 9 groups)
+colors_nejm <- pal_nejm()(8)          # For medical outcomes
+colors_jco <- pal_jco()(10)           # For oncology
+palette_viridis <- "plasma"           # For continuous
+
+# ============================================================
+# DATA LOADING
+# ============================================================
+
+data <- read.csv("../05_extraction/extraction.csv")
+
+# ============================================================
+# FIGURE 1: PRIMARY OUTCOME (Forest Plot)
+# ============================================================
+
+res_pcr <- metabin(
+  event.e = events_pcr_ici,
+  n.e = total_ici,
+  event.c = events_pcr_control,
+  n.c = total_control,
+  data = data,
+  studlab = study_id,
+  sm = "RR"
+)
+
+# Export as PNG (base R plot)
+png("../07_manuscript/figures/figure1_pcr.png",
+    width = 10, height = 8, units = "in", res = 300)
+
+forest(res_pcr,
+       col.square = colors_lancet[1],
+       col.diamond = colors_lancet[2],
+       print.I2 = TRUE,
+       print.pval.Q = TRUE)
+
+dev.off()
+
+# ============================================================
+# FIGURE 2: SUBGROUP ANALYSIS (ggplot)
+# ============================================================
+
+p_subgroup <- ggplot(subgroup_data, aes(x = subgroup, y = rr, fill = subgroup)) +
+  geom_col() +
+  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), width = 0.2) +
+  scale_fill_lancet() +              # Use Lancet colors
+  labs(
+    title = "Subgroup Analysis: Pathologic Complete Response",
+    x = "Subgroup",
+    y = "Risk Ratio (95% CI)"
+  )
+
+ggsave("../07_manuscript/figures/figure2_subgroup.png",
+       width = 10, height = 6, dpi = 300)
+
+# ============================================================
+# FIGURE 3: PUBLICATION BIAS (Funnel Plot)
+# ============================================================
+
+funnel_data <- data.frame(
+  se = res_pcr$seTE,
+  effect = res_pcr$TE
+)
+
+p_funnel <- ggplot(funnel_data, aes(x = effect, y = se)) +
+  geom_point(aes(color = se), size = 3) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_color_viridis_c(option = "plasma") +  # Colorblind-safe gradient
+  scale_y_reverse() +
+  labs(
+    title = "Funnel Plot: Publication Bias Assessment",
+    x = "Log Risk Ratio",
+    y = "Standard Error",
+    color = "SE"
+  )
+
+ggsave("../07_manuscript/figures/figure3_funnel.png",
+       width = 8, height = 8, dpi = 300)
+
+# ============================================================
+# FIGURE 4: MULTI-PANEL (Combine all outcomes)
+# ============================================================
+
+combined <- p_pcr / p_efs / p_os +
+  plot_annotation(
+    title = "Efficacy Outcomes: ICI vs Control",
+    tag_levels = "A"
+  )
+
+ggsave("../07_manuscript/figures/figure4_efficacy.png",
+       width = 10, height = 14, dpi = 300)
+
+# ============================================================
+# SUMMARY
+# ============================================================
+
+cat("\n✅ All figures generated successfully!\n")
+cat("   - Figure 1: Primary outcome (forest plot)\n")
+cat("   - Figure 2: Subgroup analysis\n")
+cat("   - Figure 3: Funnel plot\n")
+cat("   - Figure 4: Multi-panel efficacy\n")
+cat("\n📁 Output directory: 07_manuscript/figures/\n")
+cat("📏 Resolution: 300 DPI (publication quality)\n")
+cat("🎨 Theme: hrbrthemes + Lancet colors\n")
+```
+
+### Why These Packages Matter
+
+**Before (default ggplot2)**:
+```r
+# Default ggplot2 — looks amateur
+ggplot(data, aes(x, y, color = group)) +
+  geom_point()
+# Result: Gray background, poor contrast, generic colors
+```
+
+**After (professional themes)**:
+```r
+# With hrbrthemes + ggsci — publication-ready
+library(hrbrthemes)
+library(ggsci)
+
+ggplot(data, aes(x, y, color = group)) +
+  geom_point(size = 3) +
+  scale_color_lancet() +
+  theme_ipsum_rc() +
+  labs(title = "Professional Figure")
+
+# Result: Clean background, readable fonts, journal colors
+# Time saved: 30-60 minutes per figure (no manual tweaking)
+```
+
+**Key Benefits**:
+1. **Speed**: No trial-and-error with colors and fonts
+2. **Consistency**: All figures have matching style
+3. **Accessibility**: Colorblind-safe palettes prevent exclusion
+4. **Credibility**: Professional appearance increases trust
+5. **Journal alignment**: Match target journal aesthetics
 
 ---
 
