@@ -1,1810 +1,274 @@
 # R Figure Generation Guide for Meta-Analysis
 
-**Purpose**: Generate publication-quality figures at 300 DPI using R
+**Purpose**: Generate publication-quality figures and tables at 300 DPI using R
 **When to use**: Stage 06 (Analysis) and Stage 07 (Manuscript)
 
 ---
 
-## R Package Ecosystem
+## 🚀 Quick Navigation
 
-When generating figures, consult these authoritative sources for package documentation:
+**New to R?** → Start with [r-guides/00-setup.md](r-guides/00-setup.md) (10 min setup)
 
-### Core Package Repositories
-
-1. **[CRAN](https://cran.r-project.org/)** — The Comprehensive R Archive Network
-   - Official R package repository (19,000+ packages)
-   - All packages peer-reviewed and tested
-   - Use: `install.packages("package_name")`
-   - Browse: https://cran.r-project.org/web/packages/available_packages_by_name.html
-
-2. **[Bioconductor](https://bioconductor.org/)** — Bioinformatics & Genomics
-   - Specialized packages for biological data analysis
-   - Use: `BiocManager::install("package_name")`
-   - Browse: https://bioconductor.org/packages/release/BiocViews.html
-
-3. **[Tidyverse](https://www.tidyverse.org/)** — Modern Data Science
-   - Core packages: ggplot2, dplyr, tidyr, readr
-   - Consistent API design
-   - Use: `install.packages("tidyverse")`
-   - Learn: https://www.tidyverse.org/learn/
-
-4. **[rOpenSci](https://ropensci.org/)** — Peer-Reviewed Scientific Tools
-   - Community-driven, open peer review
-   - High-quality packages for reproducible research
-   - Browse: https://ropensci.org/packages/
-
-5. **[R-universe](https://r-universe.dev/)** — Next-Gen Package Discovery
-   - Search across CRAN, Bioconductor, GitHub
-   - View dependencies and reverse dependencies
-   - Browse: https://r-universe.dev/search/
+**Need specific help?** → See task-based guides below
 
 ---
 
-## Essential Packages for Meta-Analysis Figures
+## 📖 Task-Based Guides
 
-### Meta-Analysis Core
+### I Need To...
 
-```r
-# Install meta-analysis packages
-install.packages(c("meta", "metafor", "dmetar"))
-
-# Load packages
-library(meta)      # Simple interface for meta-analysis
-library(metafor)   # Comprehensive meta-analysis tools
-library(dmetar)    # Companion to "Doing Meta-Analysis in R"
-```
-
-**Documentation**:
-
-- meta: https://cran.r-project.org/web/packages/meta/
-- metafor: https://www.metafor-project.org/
-- dmetar: https://dmetar.protectlab.org/
-
-### Plotting & Visualization
-
-```r
-# Install core visualization packages
-install.packages(c(
-  "ggplot2",      # Grammar of graphics
-  "patchwork",    # Combine multiple plots
-  "cowplot",      # Publication-ready themes
-  "ggpubr",       # Publication-ready plots
-  "forestplot"    # Specialized forest plots
-))
-
-# Install professional theme packages
-install.packages(c(
-  "ggthemes",     # Professional themes (Economist, WSJ, etc.)
-  "hrbrthemes",   # Typography-focused themes
-  "tvthemes",     # TV show inspired themes
-  "viridis",      # Colorblind-friendly palettes
-  "scico",        # Scientific color maps
-  "ggsci",        # Scientific journal color palettes
-  "ggthemr"       # Easy theme switching (from GitHub)
-))
-
-# ggthemr requires installation from GitHub
-# install.packages("devtools")
-# devtools::install_github("Mikata-Project/ggthemr")
-```
-
-**Key packages**:
-
-1. **ggplot2** — Grammar of Graphics
-   - Flexible, publication-quality plots
-   - [Documentation](https://ggplot2.tidyverse.org/)
-   - [Gallery](https://r-graph-gallery.com/ggplot2-package.html)
-
-2. **patchwork** — Multi-Panel Figures
-   - Intuitive syntax: `plot1 + plot2`
-   - [Documentation](https://patchwork.data-imaginist.com/)
-   - Perfect for journal submissions
-
-3. **cowplot** — Publication Themes
-   - Clean themes for publications
-   - [Documentation](https://wilkelab.org/cowplot/)
-   - Panel labeling: `plot_grid(labels="AUTO")`
-
-4. **forestplot** — Specialized Forest Plots
-   - High-level forest plot interface
-   - [Documentation](https://cran.r-project.org/web/packages/forestplot/)
-
-### Professional Themes & Color Palettes
-
-**Why use professional themes?**
-
-- **Consistency**: Journal-quality aesthetics across all figures
-- **Accessibility**: Colorblind-friendly palettes (viridis, scico)
-- **Impact**: Professional appearance increases credibility
-- **Time savings**: Pre-designed themes eliminate trial-and-error
-
-#### Recommended Theme Packages
-
-1. **ggthemr** — Easy Theme Switching
-   - [GitHub](https://github.com/Mikata-Project/ggthemr)
-   - One-line theme application
-   - Themes: `flat`, `fresh`, `pale`, `earth`, `grape`
-   - **Use for**: Clean, modern figures with consistent color schemes
-
-2. **hrbrthemes** — Typography-Focused
-   - [CRAN](https://cran.r-project.org/web/packages/hrbrthemes/)
-   - Professional typography with Roboto Condensed fonts
-   - Minimal distractions, focus on data
-   - **Use for**: High-impact journal submissions (Nature, Science)
-
-3. **tvthemes** — Stylized Themes
-   - [GitHub](https://github.com/Ryo-N7/tvthemes)
-   - TV show inspired (Avatar, Brooklyn 99, etc.)
-   - Fun for presentations, not recommended for publications
-   - **Use for**: Conference talks, lab meetings
-
-4. **ggthemes** — Professional Standards
-   - [CRAN](https://cran.r-project.org/web/packages/ggthemes/)
-   - Economist, WSJ, FiveThirtyEight styles
-   - `theme_tufte()` for minimalist design
-   - **Use for**: Matching target journal style (Economist theme for health policy)
-
-5. **viridis** — Colorblind-Friendly
-   - [CRAN](https://cran.r-project.org/web/packages/viridis/)
-   - Perceptually uniform color maps
-   - 5 palettes: viridis, magma, inferno, plasma, cividis
-   - **Use for**: ALL color gradients (mandatory for accessibility)
-
-6. **scico** — Scientific Color Maps
-   - [CRAN](https://cran.r-project.org/web/packages/scico/)
-   - 30+ scientific color palettes
-   - Perceptually uniform, colorblind-safe
-   - **Use for**: Heatmaps, continuous variables
-
-7. **ggsci** — Journal Color Palettes
-   - [CRAN](https://cran.r-project.org/web/packages/ggsci/)
-   - Nature, NEJM, Lancet, JAMA color schemes
-   - `scale_color_nejm()`, `scale_fill_lancet()`
-   - **Use for**: Matching target journal aesthetics
+| Task | Guide | Time |
+|------|-------|------|
+| **Set up R packages** | [00-setup.md](r-guides/00-setup.md) | 10-15 min |
+| **Make a forest plot** | [01-forest-plots.md](r-guides/01-forest-plots.md) | 15-30 min |
+| **Create a funnel plot** | [02-funnel-plots.md](r-guides/02-funnel-plots.md) | 10-15 min |
+| **Do subgroup analysis** | [03-subgroup-plots.md](r-guides/03-subgroup-plots.md) | 20-30 min |
+| **Combine multiple plots** | [04-multi-panel.md](r-guides/04-multi-panel.md) | 15-20 min |
+| **Create Table 1** | [05-table1-gtsummary.md](r-guides/05-table1-gtsummary.md) | 30-60 min |
+| **Make regression tables** | [06-regression-tables.md](r-guides/06-regression-tables.md) | 20-30 min |
+| **Choose colors/themes** | [07-themes-colors.md](r-guides/07-themes-colors.md) | 10-15 min |
+| **Learn ggplot2 basics** | [08-ggplot2-patterns.md](r-guides/08-ggplot2-patterns.md) | 30-45 min |
 
 ---
 
-## Professional Theme Usage
+## 📦 Package Quick Reference
 
-### Quick Start: Apply Themes to Your Plots
+Each guide lists packages needed for that specific task. Here's the full list:
 
-#### Method 1: ggthemr (Simplest)
-
-```r
-library(ggplot2)
-library(ggthemr)
-
-# Set theme once, applies to ALL subsequent plots
-ggthemr("fresh")  # Options: flat, fresh, pale, earth, grape, light, chalk
-
-# All plots now use this theme automatically
-p1 <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
-p2 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) + geom_point()
-
-# Reset to default ggplot2 theme
-ggthemr_reset()
-```
-
-**Best themes for publications**:
-
-- `fresh` — Clean, modern (recommended for most journals)
-- `pale` — Soft colors, high contrast
-- `flat` — Minimal, professional
-
-#### Method 2: hrbrthemes (Best Typography)
+### Core Packages (Install Once)
 
 ```r
-library(ggplot2)
-library(hrbrthemes)
-
-# Apply to individual plot
-p <- ggplot(mtcars, aes(mpg, wt)) +
-  geom_point() +
-  theme_ipsum() +              # Main theme
-  labs(title = "Highway MPG vs Weight")
-
-# Variations
-theme_ipsum_rc()  # Roboto Condensed (recommended)
-theme_ipsum_ps()  # IBM Plex Sans
-theme_ipsum_tw()  # Titillium Web
-```
-
-**Why use hrbrthemes?**
-
-- Professional typography out-of-the-box
-- High contrast for readability
-- Minimal grid lines (focuses attention on data)
-- Used by data journalism (FiveThirtyEight style)
-
-#### Method 3: ggsci (Journal Color Palettes)
-
-```r
-library(ggplot2)
-library(ggsci)
-
-# Match Nature journal colors
-p <- ggplot(data, aes(x, y, color = group)) +
-  geom_point() +
-  scale_color_npg() +           # Nature Publishing Group
-  theme_minimal()
-
-# Other journal palettes
-scale_color_nejm()   # New England Journal of Medicine
-scale_color_lancet() # The Lancet
-scale_color_jama()   # JAMA
-scale_color_jco()    # Journal of Clinical Oncology
-```
-
-**When to use**:
-
-- Submitting to specific journal → use that journal's palette
-- General medical journal → use NEJM or Lancet
-- Oncology → use JCO palette
-
-#### Method 4: viridis (Colorblind-Safe)
-
-```r
-library(ggplot2)
-library(viridis)
-
-# For continuous variables
-p <- ggplot(data, aes(x, y, color = value)) +
-  geom_point() +
-  scale_color_viridis_c(option = "plasma")  # Options: A-H
-
-# For discrete groups
-p <- ggplot(data, aes(x, y, color = group)) +
-  geom_point() +
-  scale_color_viridis_d(option = "viridis")
-
-# Options explained
-# "viridis" (A) — Default, purple to yellow
-# "magma"   (B) — Dark purple to white
-# "inferno" (C) — Black to yellow
-# "plasma"  (D) — Purple to pink to yellow (recommended)
-# "cividis" (E) — Blue to yellow (best for colorblind)
-```
-
-**Mandatory use cases**:
-
-- Heatmaps
-- Continuous color scales
-- Any plot where color represents data value
-- Plots that might be printed in grayscale
-
-#### Method 5: Combining Multiple Packages
-
-```r
-library(ggplot2)
-library(hrbrthemes)
-library(ggsci)
-
-# Professional plot with best practices
-p <- ggplot(data, aes(x, y, color = treatment)) +
-  geom_point(size = 3, alpha = 0.7) +
-  geom_smooth(method = "loess", se = TRUE) +
-  scale_color_lancet() +        # Lancet color palette
-  theme_ipsum_rc() +            # Professional typography
-  labs(
-    title = "Treatment Effect Over Time",
-    subtitle = "RCT data from 5 trials (N=2,402)",
-    x = "Time (months)",
-    y = "Response Rate (%)",
-    color = "Treatment"
-  )
-
-ggsave("figures/treatment_effect.png", width = 10, height = 6, dpi = 300)
-```
-
----
-
-## ggplot2 Best Practices for Meta-Analysis
-
-### Data Preparation & Mapping
-
-**Keep data in tidy (long) format**:
-
-```r
-# ❌ Bad: Wide format
-data_wide <- data.frame(
-  study = c("Trial A", "Trial B"),
-  ici_events = c(50, 60),
-  control_events = c(40, 45)
-)
-
-# ✅ Good: Long format (tidy)
-library(tidyr)
-data_long <- data_wide %>%
-  pivot_longer(
-    cols = ends_with("_events"),
-    names_to = "treatment",
-    values_to = "events"
-  )
-
-# Now easy to plot
-ggplot(data_long, aes(x = study, y = events, fill = treatment)) +
-  geom_col(position = "dodge")
-```
-
-**Map aesthetics efficiently**:
-
-```r
-# ✅ Good: Global aesthetics
-ggplot(data, aes(x = time, y = response, color = treatment)) +
-  geom_point() +
-  geom_line()
-
-# ❌ Bad: Repeating aesthetics
-ggplot(data) +
-  geom_point(aes(x = time, y = response, color = treatment)) +
-  geom_line(aes(x = time, y = response, color = treatment))
-
-# ✅ Good: Override only when needed
-ggplot(data, aes(x = time, y = response, color = treatment)) +
-  geom_point() +
-  geom_line(aes(linetype = trial))  # Only linetype differs
-```
-
-### Layering & Geoms
-
-**Build plots incrementally**:
-
-```r
-# Start simple
-p <- ggplot(data, aes(x = dose, y = response))
-
-# Add layers step by step
-p <- p + geom_point(size = 3)
-p <- p + geom_smooth(method = "loess")
-p <- p + scale_y_continuous(limits = c(0, 100))
-p <- p + labs(title = "Dose-Response Relationship")
-p <- p + theme_minimal()
-
-# View result
-p
-```
-
-**Choose correct geoms**:
-
-```r
-# ✅ Good: Use geom_col() for pre-summarized data
-summary_data <- data.frame(
-  group = c("ICI", "Control"),
-  mean_response = c(65, 45)
-)
-ggplot(summary_data, aes(x = group, y = mean_response)) +
-  geom_col()
-
-# ❌ Bad: geom_bar(stat = "identity") is verbose
-ggplot(summary_data, aes(x = group, y = mean_response)) +
-  geom_bar(stat = "identity")
-
-# ✅ Good: Use geom_jitter() for overplotting
-ggplot(data, aes(x = treatment, y = response)) +
-  geom_jitter(width = 0.2, alpha = 0.5)
-
-# ❌ Bad: geom_point() hides overlapping data
-ggplot(data, aes(x = treatment, y = response)) +
-  geom_point()
-```
-
-### Scales & Colors
-
-**Always label clearly**:
-
-```r
-# ✅ Good: Comprehensive labels
-ggplot(data, aes(x = time, y = survival, color = treatment)) +
-  geom_line() +
-  labs(
-    title = "Overall Survival by Treatment",
-    subtitle = "Kaplan-Meier estimates (N=1,174 patients)",
-    x = "Time since randomization (months)",
-    y = "Survival probability",
-    color = "Treatment arm",
-    caption = "Data from KEYNOTE-522 trial"
-  )
-
-# ❌ Bad: Default labels
-ggplot(data, aes(x = time, y = survival, color = treatment)) +
-  geom_line()
-```
-
-**Use colorblind-friendly palettes**:
-
-```r
-# ✅ Good: Viridis for continuous
-ggplot(data, aes(x, y, color = p_value)) +
-  geom_point() +
-  scale_color_viridis_c(option = "plasma")
-
-# ✅ Good: ColorBrewer for categorical
-ggplot(data, aes(x, y, fill = treatment)) +
-  geom_boxplot() +
-  scale_fill_brewer(palette = "Set2")
-
-# ❌ Bad: Default rainbow colors (not colorblind-safe)
-ggplot(data, aes(x, y, color = treatment)) +
-  geom_point() +
-  scale_color_manual(values = rainbow(5))
-```
-
-**Set limits and breaks explicitly**:
-
-```r
-# ✅ Good: Explicit control for precision
-ggplot(data, aes(x = dose, y = response)) +
-  geom_point() +
-  scale_x_continuous(
-    limits = c(0, 100),
-    breaks = seq(0, 100, by = 20),
-    labels = function(x) paste0(x, " mg")
-  ) +
-  scale_y_continuous(
-    limits = c(0, 1),
-    breaks = seq(0, 1, by = 0.2),
-    labels = scales::percent
-  )
-
-# ❌ Bad: Relying on defaults (may cut off data)
-ggplot(data, aes(x = dose, y = response)) +
-  geom_point()
-```
-
-### Themes & Appearance
-
-**Start with clean base theme**:
-
-```r
-# ✅ Good: Choose clean theme early
-ggplot(data, aes(x, y)) +
-  geom_point() +
-  theme_minimal()  # or theme_light(), theme_bw()
-
-# ❌ Bad: Using default gray theme
-ggplot(data, aes(x, y)) +
-  geom_point()
-```
-
-**Create reusable custom theme**:
-
-```r
-# ✅ Good: Define once, use everywhere
-my_meta_theme <- function() {
-  theme_minimal(base_size = 14) +
-    theme(
-      plot.title = element_text(face = "bold", size = 16),
-      plot.subtitle = element_text(color = "gray40"),
-      legend.position = "bottom",
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(color = "black", size = 0.5)
-    )
-}
-
-# Apply to all plots
-p1 <- ggplot(data1, aes(x, y)) + geom_point() + my_meta_theme()
-p2 <- ggplot(data2, aes(x, y)) + geom_line() + my_meta_theme()
-p3 <- ggplot(data3, aes(x, y)) + geom_col() + my_meta_theme()
-
-# Consistent appearance across all figures!
-```
-
-**Avoid chart junk**:
-
-```r
-# ✅ Good: Minimal, focused
-ggplot(data, aes(x = treatment, y = response)) +
-  geom_boxplot() +
-  theme_minimal() +
-  theme(
-    panel.grid.major.x = element_blank(),  # Remove vertical grid
-    panel.grid.minor = element_blank(),    # Remove minor grid
-    legend.position = "none"               # Remove if obvious from axis
-  )
-
-# ❌ Bad: Too much visual noise
-ggplot(data, aes(x = treatment, y = response)) +
-  geom_boxplot() +
-  theme_gray() +  # Gray background
-  theme(
-    panel.border = element_rect(fill = NA, size = 2),  # Heavy border
-    panel.grid = element_line(size = 1)  # Heavy gridlines
-  )
-```
-
-### Complete Example: Meta-Analysis Plot with Best Practices
-
-```r
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(hrbrthemes)
-library(ggsci)
-
-# 1. Prepare tidy data
-forest_data <- extraction_data %>%
-  select(study_id, rr, ci_lower, ci_upper, weight) %>%
-  arrange(desc(weight))  # Order by weight
-
-# 2. Define custom theme
-meta_theme <- function() {
-  theme_ipsum_rc(base_size = 12) +
-    theme(
-      plot.title = element_text(face = "bold", size = 14),
-      legend.position = "bottom",
-      panel.grid.minor = element_blank(),
-      axis.line = element_line(size = 0.5)
-    )
-}
-
-# 3. Build plot incrementally
-p <- ggplot(forest_data, aes(x = rr, y = reorder(study_id, weight)))
-
-# Add reference line
-p <- p + geom_vline(xintercept = 1, linetype = "dashed", color = "gray50")
-
-# Add points and error bars
-p <- p + geom_point(aes(size = weight), color = pal_lancet()(1))
-p <- p + geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2)
-
-# Add scales with explicit settings
-p <- p + scale_x_continuous(
-  limits = c(0.5, 2.0),
-  breaks = seq(0.5, 2.0, by = 0.25),
-  trans = "log10"
-)
-
-p <- p + scale_size_continuous(
-  range = c(3, 8),
-  guide = "none"  # Don't show size legend (redundant)
-)
-
-# Add comprehensive labels
-p <- p + labs(
-  title = "Forest Plot: Pathologic Complete Response",
-  subtitle = "Risk ratio with 95% CI (5 RCTs, N=2,402 patients)",
-  x = "Risk Ratio (log scale)",
-  y = NULL,
-  caption = "Larger points = greater study weight"
-)
-
-# Apply custom theme
-p <- p + meta_theme()
-
-# 4. Export at publication quality
-ggsave("figures/forest_plot.png",
-       plot = p,
-       width = 10,
-       height = 6,
-       dpi = 300,
-       bg = "white")
-```
-
-### Common Mistakes to Avoid
-
-| ❌ Don't Do This                   | ✅ Do This Instead              | Why                      |
-| ---------------------------------- | ------------------------------- | ------------------------ |
-| Use default colors                 | Use viridis/ggsci palettes      | Colorblind accessibility |
-| Omit axis labels                   | Always use `labs()`             | Clarity for readers      |
-| Use `geom_bar(stat="identity")`    | Use `geom_col()`                | More concise             |
-| Wide data format                   | Tidy (long) format              | Easier to map aesthetics |
-| Repeat aesthetics in each layer    | Define globally in `ggplot()`   | DRY principle            |
-| Default theme with gray background | `theme_minimal()` or custom     | Professional appearance  |
-| Include unnecessary gridlines      | Remove with `theme()`           | Reduce visual clutter    |
-| Hard-code values                   | Use scales with explicit breaks | Precision and control    |
-
-### Quick Reference Card
-
-```r
-# === DATA PREPARATION ===
-# Tidy format (long)
-data %>% pivot_longer(cols, names_to, values_to)
-
-# === PLOT STRUCTURE ===
-ggplot(data, aes(x, y, color = group)) +  # Global aesthetics
-  geom_point() +                          # Geom layer
-  scale_color_viridis_d() +               # Color scale
-  labs(title, x, y) +                     # Labels
-  theme_minimal() +                       # Base theme
-  theme(legend.position = "bottom")       # Theme tweaks
-
-# === EXPORT ===
-ggsave("file.png", width = 10, height = 6, dpi = 300)
-```
-
----
-
-## Figure Generation Workflow
-
-### 1. Forest Plots (Primary Outcome)
-
-**Using metafor with professional themes**:
-
-```r
-library(metafor)
-library(meta)
-library(ggplot2)
-library(ggsci)
-
-# Load extraction data
-data <- read.csv("05_extraction/extraction.csv")
-
-# Calculate risk ratios
-res <- metabin(
-  event.e = events_ici,
-  n.e = total_ici,
-  event.c = events_control,
-  n.c = total_control,
-  data = data,
-  studlab = study_id,
-  sm = "RR",
-  method = "MH",
-  fixed = FALSE,
-  random = TRUE
-)
-
-# Create forest plot with Lancet colors
-png("07_manuscript/figures/figure1_forest.png",
-    width = 10, height = 8, units = "in", res = 300)
-
-# Use Lancet color palette (professional medical journal style)
-lancet_colors <- pal_lancet()(2)  # Get 2 colors from Lancet palette
-
-forest(res,
-       xlim = c(0.5, 2.0),
-       xlab = "Risk Ratio",
-       slab = data$study_id,
-       col.square = lancet_colors[1],    # Lancet blue
-       col.diamond = lancet_colors[2],   # Lancet red
-       comb.fixed = FALSE,
-       comb.random = TRUE,
-       print.I2 = TRUE,
-       print.pval.Q = TRUE)
-
-dev.off()
-```
-
-**Alternative: Using ggplot2 forest plot with hrbrthemes**:
-
-```r
-library(ggplot2)
-library(hrbrthemes)
-library(ggsci)
-
-# Create custom forest plot data
-forest_data <- data.frame(
-  study = data$study_id,
-  rr = exp(res$TE),
-  ci_lower = exp(res$TE - 1.96 * res$seTE),
-  ci_upper = exp(res$TE + 1.96 * res$seTE),
-  weight = res$w.random
-)
-
-# Create ggplot forest plot with professional theme
-p <- ggplot(forest_data, aes(x = rr, y = study)) +
-  geom_vline(xintercept = 1, linetype = "dashed", color = "gray50") +
-  geom_point(aes(size = weight), color = pal_lancet()(1)) +
-  geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2) +
-  scale_x_log10() +
-  theme_ipsum_rc() +
-  labs(
-    title = "Forest Plot: Pathologic Complete Response",
-    x = "Risk Ratio (95% CI)",
-    y = NULL,
-    size = "Weight"
-  )
-
-ggsave("07_manuscript/figures/figure1_forest_ggplot.png",
-       width = 10, height = 8, dpi = 300)
-```
-
-**Using forest() from meta package**:
-
-```r
-# Alternative: Simpler interface
-library(meta)
-
-res <- metabin(
-  event.e, n.e, event.c, n.c,
-  data = data,
-  studlab = study_id,
-  sm = "RR"
-)
-
-# Export forest plot
-png("07_manuscript/figures/figure1_forest.png",
-    width = 10, height = 8, units = "in", res = 300)
-forest(res)
-dev.off()
-```
-
-### 2. Multi-Panel Figures with patchwork
-
-**Combine efficacy outcomes (pCR, EFS, OS)**:
-
-```r
-library(ggplot2)
-library(patchwork)
-
-# Create individual plots
-p1 <- forest(res_pcr) + ggtitle("A. Pathologic Complete Response")
-p2 <- forest(res_efs) + ggtitle("B. Event-Free Survival")
-p3 <- forest(res_os) + ggtitle("C. Overall Survival")
-
-# Combine with patchwork
-combined <- p1 / p2 / p3
-
-# Export at 300 DPI
-ggsave("07_manuscript/figures/figure1_efficacy.png",
-       plot = combined,
-       width = 10, height = 12, dpi = 300)
-```
-
-**Using cowplot for panel labels**:
-
-```r
-library(cowplot)
-
-# Combine with automatic panel labels
-combined <- plot_grid(
-  p1, p2, p3,
-  labels = c("A", "B", "C"),
-  ncol = 1,
-  rel_heights = c(1, 1, 1)
-)
-
-# Export
-ggsave("07_manuscript/figures/figure1_efficacy.png",
-       plot = combined,
-       width = 10, height = 12, dpi = 300)
-```
-
-### 3. Subgroup Analysis
-
-```r
-# Subgroup forest plot
-res_subgroup <- metabin(
-  event.e, n.e, event.c, n.c,
-  data = data,
-  studlab = study_id,
-  subgroup = pdl1_status,
-  sm = "RR"
-)
-
-png("07_manuscript/figures/figure2_subgroup.png",
-    width = 12, height = 10, units = "in", res = 300)
-
-forest(res_subgroup,
-       overall = TRUE,
-       overall.hetstat = TRUE,
-       test.subgroup = TRUE,
-       print.subgroup.name = TRUE)
-
-dev.off()
-```
-
-### 4. Funnel Plots (Publication Bias)
-
-```r
-# Create funnel plot
-png("07_manuscript/figures/figure3_funnel.png",
-    width = 8, height = 8, units = "in", res = 300)
-
-funnel(res,
-       xlab = "Risk Ratio (log scale)",
-       studlab = TRUE)
-
-dev.off()
-
-# Enhanced funnel plot with contour
-library(metafor)
-funnel(res,
-       level = c(90, 95, 99),
-       shade = c("white", "gray", "darkgray"),
-       refline = 0)
-```
-
-### 5. Risk of Bias Summary
-
-```r
-library(ggplot2)
-library(tidyr)
-
-# Load RoB data
-rob_data <- read.csv("03_screening/quality_rob2.csv")
-
-# Reshape for plotting
-rob_long <- rob_data %>%
-  pivot_longer(
-    cols = starts_with("domain"),
-    names_to = "domain",
-    values_to = "judgement"
-  )
-
-# Create RoB plot
-p <- ggplot(rob_long, aes(x = domain, fill = judgement)) +
-  geom_bar(position = "fill") +
-  scale_fill_manual(
-    values = c("Low" = "green", "Some concerns" = "yellow", "High" = "red")
-  ) +
-  labs(y = "Proportion", x = "Risk of Bias Domain") +
-  theme_minimal() +
-  coord_flip()
-
-ggsave("07_manuscript/figures/figure4_rob.png",
-       plot = p, width = 10, height = 6, dpi = 300)
-```
-
-### 6. Publication-Ready Tables with gtsummary
-
-**gtsummary** is essential for creating professional summary tables in meta-analysis manuscripts.
-
-#### Installation
-
-```r
-install.packages("gtsummary")
-
-# Recommended companion packages
-install.packages(c("gt", "flextable", "kableExtra"))
-```
-
-#### Basic Table Creation
-
-```r
-library(gtsummary)
-library(dplyr)
-
-# Load study characteristics data
-data <- read.csv("05_extraction/extraction.csv")
-
-# Table 1: Study Characteristics
-tbl_baseline <- data %>%
-  select(age_mean, female_pct, stage_iii_pct, pdl1_positive_pct) %>%
-  tbl_summary(
-    label = list(
-      age_mean ~ "Age (years)",
-      female_pct ~ "Female (%)",
-      stage_iii_pct ~ "Stage III (%)",
-      pdl1_positive_pct ~ "PD-L1 positive (%)"
-    ),
-    statistic = list(
-      all_continuous() ~ "{mean} ({sd})",
-      all_categorical() ~ "{n} ({p}%)"
-    ),
-    digits = list(
-      all_continuous() ~ 1,
-      all_categorical() ~ 0
-    )
-  ) %>%
-  bold_labels() %>%
-  modify_caption("Table 1. Baseline Characteristics of Included Studies")
-
-# Export to Word
-tbl_baseline %>%
-  as_flex_table() %>%
-  flextable::save_as_docx(path = "07_manuscript/tables/table1.docx")
-
-# Export to HTML (for Quarto)
-tbl_baseline %>%
-  as_gt() %>%
-  gt::gtsave("07_manuscript/tables/table1.html")
-```
-
-#### Comparison Tables with P-values
-
-```r
-# Table 2: Compare ICI vs Control
-tbl_comparison <- data %>%
-  select(treatment_arm, age_mean, female_pct, response_rate) %>%
-  tbl_summary(
-    by = treatment_arm,  # Stratify by treatment
-    label = list(
-      age_mean ~ "Age (years)",
-      female_pct ~ "Female (%)",
-      response_rate ~ "Response Rate (%)"
-    ),
-    statistic = list(all_continuous() ~ "{mean} ({sd})")
-  ) %>%
-  add_p(
-    test = list(
-      all_continuous() ~ "t.test",
-      all_categorical() ~ "chisq.test"
-    )
-  ) %>%
-  add_overall() %>%  # Add overall column
-  add_n() %>%  # Add sample size
-  bold_labels() %>%
-  italicize_levels() %>%
-  modify_spanning_header(c("stat_1", "stat_2") ~ "**Treatment Arm**")
-
-# Apply JAMA journal style
-tbl_comparison %>%
-  theme_gtsummary_journal(journal = "jama")
-```
-
-#### Regression Tables
-
-```r
-library(survival)
-
-# Univariate regression
-tbl_uv <- data %>%
-  select(outcome, age, sex, stage, pdl1_status) %>%
-  tbl_uvregression(
-    method = glm,
-    y = outcome,
-    method.args = list(family = binomial),
-    exponentiate = TRUE,  # Show OR instead of log-OR
-    label = list(
-      age ~ "Age (per year)",
-      sex ~ "Sex (Female vs Male)",
-      stage ~ "Stage",
-      pdl1_status ~ "PD-L1 Status"
-    )
-  ) %>%
-  bold_labels() %>%
-  bold_p(t = 0.05)
-
-# Multivariable regression
-model_mv <- glm(outcome ~ age + sex + stage + pdl1_status,
-                data = data,
-                family = binomial)
-
-tbl_mv <- tbl_regression(
-  model_mv,
-  exponentiate = TRUE,
-  label = list(
-    age ~ "Age (per year)",
-    sex ~ "Sex (Female vs Male)",
-    stage ~ "Stage",
-    pdl1_status ~ "PD-L1 Status"
-  )
-) %>%
-  add_global_p() %>%  # Add global p-values for categorical variables
-  bold_labels() %>%
-  bold_p(t = 0.05)
-
-# Merge univariate and multivariable tables
-tbl_regression_merged <- tbl_merge(
-  tbls = list(tbl_uv, tbl_mv),
-  tab_spanner = c("**Univariate**", "**Multivariable**")
-) %>%
-  modify_caption("Table 3. Univariate and Multivariable Analysis")
-```
-
-#### Subgroup Analysis Tables
-
-```r
-# Stack subgroup analyses
-tbl_subgroup_age <- data %>%
-  filter(age_group == "<65") %>%
-  tbl_summary(by = treatment_arm) %>%
-  add_p() %>%
-  modify_caption("Age < 65 years")
-
-tbl_subgroup_age_old <- data %>%
-  filter(age_group == "≥65") %>%
-  tbl_summary(by = treatment_arm) %>%
-  add_p() %>%
-  modify_caption("Age ≥ 65 years")
-
-# Stack vertically
-tbl_subgroup_stacked <- tbl_stack(
-  tbls = list(tbl_subgroup_age, tbl_subgroup_age_old),
-  group_header = c("Age < 65 years", "Age ≥ 65 years")
-)
-```
-
-#### Journal-Specific Formatting
-
-```r
-# JAMA style
-tbl %>%
-  theme_gtsummary_journal(journal = "jama")
-
-# Lancet style
-tbl %>%
-  theme_gtsummary_journal(journal = "lancet")
-
-# NEJM style
-tbl %>%
-  theme_gtsummary_journal(journal = "nejm")
-
-# JAMA Oncology
-tbl %>%
-  theme_gtsummary_journal(journal = "jama") %>%
-  modify_header(label ~ "**Characteristic**")
-```
-
-#### Output Format Decision Tree
-
-```
-Which output format?
-├─ HTML/PDF (Quarto document)
-│  └─ Use as_gt()
-│     └─ tbl %>% as_gt() %>% gt::gtsave("table.html")
-│
-├─ Word/PowerPoint
-│  └─ Use as_flex_table()
-│     └─ tbl %>% as_flex_table() %>% flextable::save_as_docx()
-│
-├─ LaTeX/PDF (R Markdown)
-│  └─ Use as_kable_extra()
-│     └─ tbl %>% as_kable_extra()
-│
-└─ Copy-paste to manuscript
-   └─ View in RStudio Viewer, copy directly
-```
-
-#### Best Practices for gtsummary
-
-**Table Creation**:
-```r
-# ✅ Good: Clean variable selection
-data %>%
-  select(age, sex, stage) %>%  # Only analytic variables
-  tbl_summary()
-
-# ❌ Bad: Including ID columns
-data %>%
-  tbl_summary()  # Includes patient_id, date_enrolled, etc.
-```
-
-**Customization**:
-```r
-# ✅ Good: Clear labels
-tbl_summary(
-  label = list(
-    age_yrs ~ "Age (years)",
-    bmi_kgm2 ~ "BMI (kg/m²)"
-  )
-)
-
-# ❌ Bad: Using raw column names
-tbl_summary()  # Shows "age_yrs", "bmi_kgm2"
-```
-
-**Statistics**:
-```r
-# ✅ Good: Explicit statistics
-tbl_summary(
-  statistic = list(
-    all_continuous() ~ "{median} ({p25}, {p75})",  # Median (IQR)
-    all_categorical() ~ "{n} ({p}%)"
-  )
-)
-
-# ✅ Good: Multi-line continuous summaries
-tbl_summary(
-  type = list(age ~ "continuous2"),
-  statistic = list(age ~ c("{mean} ({sd})", "{median} ({p25}, {p75})"))
-)
-```
-
-**P-values**:
-```r
-# ✅ Good: Appropriate test selection
-add_p(
-  test = list(
-    all_continuous() ~ "wilcox.test",  # Non-parametric
-    all_categorical() ~ "fisher.test"  # Exact test for small n
-  )
-)
-
-# ✅ Good: Handle missing data
-tbl_summary(
-  missing = "no",  # Don't show missing row
-  # OR
-  missing_text = "Missing"  # Custom text for missing
-)
-```
-
-**Common Pitfalls**:
-
-| ❌ Don't Do This | ✅ Do This Instead | Why |
-|------------------|-------------------|-----|
-| Include ID/date columns | Filter to analytic variables first | Cleaner tables |
-| Use default column names | Provide `label` list | Readable for readers |
-| Rely on auto-detected tests | Specify `test` argument | Control for assumptions |
-| Forget `exponentiate = TRUE` | Always use for logistic/Cox | Show OR/HR, not log-OR |
-| Use default missing handling | Set `missing` or `missing_text` | Control presentation |
-| Mix `add_p()` with small n | Use exact tests | Avoid invalid p-values |
-
-#### Complete Example: Table 1 for Meta-Analysis
-
-```r
-library(gtsummary)
-library(dplyr)
-library(gt)
-
-# Load study-level data
-studies <- read.csv("05_extraction/extraction.csv")
-
-# Prepare data
-studies_clean <- studies %>%
-  select(
-    study_id,
-    publication_year,
-    n_total,
-    age_median,
-    female_pct,
-    stage_iii_pct,
-    pdl1_positive_pct,
-    ici_type,
-    follow_up_months
-  )
-
-# Create Table 1: Study Characteristics
-table1 <- studies_clean %>%
-  tbl_summary(
-    label = list(
-      publication_year ~ "Publication Year",
-      n_total ~ "Sample Size",
-      age_median ~ "Median Age (years)",
-      female_pct ~ "Female (%)",
-      stage_iii_pct ~ "Stage III (%)",
-      pdl1_positive_pct ~ "PD-L1 Positive (%)",
-      ici_type ~ "ICI Type",
-      follow_up_months ~ "Median Follow-up (months)"
-    ),
-    type = list(
-      age_median ~ "continuous2",  # Multi-line
-      follow_up_months ~ "continuous2"
-    ),
-    statistic = list(
-      all_continuous() ~ c("{median} ({p25}, {p75})", "{min} - {max}"),
-      all_categorical() ~ "{n} ({p}%)"
-    ),
-    digits = list(
-      age_median ~ 1,
-      female_pct ~ 0,
-      follow_up_months ~ 1
-    ),
-    missing = "no"
-  ) %>%
-  bold_labels() %>%
-  italicize_levels() %>%
-  modify_header(label ~ "**Characteristic**") %>%
-  modify_caption("**Table 1. Characteristics of Included Studies (N = 5 RCTs)**") %>%
-  modify_footnote(all_stat_cols() ~ "Median (IQR) or n (%)") %>%
-  theme_gtsummary_journal(journal = "jama")
-
-# Export to multiple formats
-# HTML (for Quarto)
-table1 %>%
-  as_gt() %>%
-  gt::gtsave("07_manuscript/tables/table1.html")
-
-# Word (for submission)
-table1 %>%
-  as_flex_table() %>%
-  flextable::save_as_docx(path = "07_manuscript/tables/table1.docx")
-
-# Print to console (for preview)
-print(table1)
-```
-
-#### Quick Reference: gtsummary
-
-```r
-# === BASIC STRUCTURE ===
-data %>%
-  select(vars) %>%                    # Select variables
-  tbl_summary(
-    by = group_var,                   # Stratify
-    label = list(...),                # Variable labels
-    statistic = list(...)             # Statistics
-  ) %>%
-  add_p() %>%                         # P-values
-  add_overall() %>%                   # Overall column
-  add_n() %>%                         # Sample size
-  bold_labels() %>%                   # Format
-  theme_gtsummary_journal("jama")     # Journal style
-
-# === REGRESSION ===
-tbl_uvregression(method = glm, exponentiate = TRUE) # Univariate
-tbl_regression(model, exponentiate = TRUE)          # Multivariable
-add_global_p()                                      # Global p-values
-
-# === EXPORT ===
-as_gt() %>% gt::gtsave("file.html")                # HTML
-as_flex_table() %>% flextable::save_as_docx()      # Word
-as_kable_extra()                                   # LaTeX
-```
-
----
-
-## Best Practices
-
-### Theme Selection Guide
-
-**Choose theme based on target journal**:
-
-| Journal Type              | Recommended Theme    | Color Palette             | Reason                                  |
-| ------------------------- | -------------------- | ------------------------- | --------------------------------------- |
-| Nature, Science, Cell     | hrbrthemes + ggsci   | `scale_color_npg()`       | Professional typography, journal colors |
-| Lancet, NEJM, JAMA        | hrbrthemes           | `scale_color_lancet()`    | Medical journal standards               |
-| PLOS ONE                  | ggthemr("fresh")     | viridis                   | Open access, colorblind-safe required   |
-| Oncology journals         | hrbrthemes           | `scale_color_jco()`       | Specialty palette                       |
-| Any journal (safe choice) | hrbrthemes + viridis | `scale_color_viridis_d()` | Accessible, professional                |
-
-**Meta-analysis specific recommendations**:
-
-```r
-library(ggplot2)
-library(hrbrthemes)
-library(ggsci)
-
-# Set up once at start of script
-theme_set(theme_ipsum_rc(base_size = 12))  # Consistent theme for all plots
-
-# For forest plots (categorical outcomes)
-scale_color_lancet()  # Clear distinction between studies
-
-# For funnel plots (continuous)
-scale_color_viridis_c(option = "plasma")  # Publication bias gradient
-
-# For subgroup analysis
-scale_fill_jco()  # Multiple subgroups need distinct colors
-```
-
-### Color Palette Decision Tree
-
-```
-Need colors?
-├─ Continuous variable (e.g., p-value, effect size)
-│  └─ Use viridis or scico (colorblind-safe)
-│     └─ ggplot(...) + scale_color_viridis_c()
-│
-├─ Categorical groups (2-8 groups)
-│  ├─ Medical journal submission?
-│  │  └─ Use ggsci journal palette
-│  │     └─ scale_color_nejm() or scale_color_lancet()
-│  └─ General publication?
-│     └─ Use viridis discrete
-│        └─ scale_color_viridis_d()
-│
-└─ Heatmap or intensity plot
-   └─ Use scico or viridis
-      └─ scale_fill_scico(palette = "bilbao")
-```
-
-### Export Settings
-
-**Always use these settings**:
-
-```r
-# For ggplot2
-ggsave("filename.png",
-       width = 10,        # inches
-       height = 8,        # inches
-       dpi = 300,         # publication quality
-       units = "in")
-
-# For base R / meta package
-png("filename.png",
-    width = 10,           # inches
-    height = 8,           # inches
-    units = "in",
-    res = 300)           # resolution
-
-# Your plotting code here
-
-dev.off()
-```
-
-### File Organization
-
-```
-06_analysis/
-├── scripts/
-│   ├── 01_forest_pcr.R          # Primary outcome
-│   ├── 02_forest_secondary.R    # Secondary outcomes
-│   ├── 03_subgroup.R            # Subgroup analysis
-│   ├── 04_funnel.R              # Publication bias
-│   └── 05_assemble_panels.R     # Multi-panel figures
-└── figures/
-    ├── figure1_pcr.png          # Individual plots
-    ├── figure2_efs.png
-    ├── figure3_os.png
-    └── combined_efficacy.png    # Multi-panel
-
-07_manuscript/
-└── figures/                     # Final publication figures
-    ├── figure1_efficacy.png     # 3-panel: pCR + EFS + OS
-    ├── figure2_subgroup.png     # Subgroup forest plot
-    ├── figure3_funnel.png       # Funnel plot
-    └── figure4_rob.png          # Risk of bias summary
-```
-
-### Reproducibility
-
-**Create master script**:
-
-```r
-# 06_analysis/generate_all_figures.R
-
-# Set working directory
-setwd("/Users/htlin/meta-pipe/06_analysis")
-
-# Load data
-source("scripts/00_load_data.R")
-
-# Generate figures in order
-source("scripts/01_forest_pcr.R")
-source("scripts/02_forest_secondary.R")
-source("scripts/03_subgroup.R")
-source("scripts/04_funnel.R")
-source("scripts/05_assemble_panels.R")
-
-# Copy to manuscript folder
-file.copy(
-  list.files("figures", pattern = "^figure.*\\.png$", full.names = TRUE),
-  "../07_manuscript/figures/",
-  overwrite = TRUE
-)
-
-cat("All figures generated successfully!\n")
-```
-
-**Run from command line**:
-
-```bash
-cd /Users/htlin/meta-pipe/06_analysis
-Rscript generate_all_figures.R
-```
-
----
-
-## Common Issues & Solutions
-
-### Issue 1: Package Not Found
-
-```r
-# Error: package 'meta' not found
-
-# Solution: Install from CRAN
-install.packages("meta")
-
-# Or check CRAN mirror
-options(repos = c(CRAN = "https://cloud.r-project.org/"))
-install.packages("meta")
-```
-
-### Issue 2: Font Issues in PDF Export
-
-```r
-# Error: font family not found
-
-# Solution: Use cairo device
-ggsave("figure.png", device = "png", type = "cairo")
-
-# Or for PDF
-cairo_pdf("figure.pdf", width = 10, height = 8)
-# Your plot here
-dev.off()
-```
-
-### Issue 3: Figure Too Small / Text Unreadable
-
-```r
-# Problem: Text too small in exported figure
-
-# Solution: Increase base_size in theme
-library(ggplot2)
-
-p <- ggplot(data, aes(x, y)) +
-  geom_point() +
-  theme_minimal(base_size = 14)  # Increase from default 11
-
-ggsave("figure.png", width = 10, height = 8, dpi = 300)
-```
-
-### Issue 4: Multi-Panel Alignment
-
-```r
-# Problem: Panels misaligned in cowplot
-
-# Solution: Use align and axis parameters
-library(cowplot)
-
-plot_grid(
-  p1, p2, p3,
-  labels = c("A", "B", "C"),
-  align = "v",        # Align vertically
-  axis = "l",         # Align on left axis
-  ncol = 1
-)
-```
-
----
-
-## Journal-Specific Requirements
-
-### Nature/Lancet/NEJM
-
-- **DPI**: 300-600 for line art, 300 for photos
-- **Format**: TIFF or PNG (not JPEG)
-- **Fonts**: Arial or Helvetica, 6-8pt minimum
-- **Width**: Single column (89mm) or double (183mm)
-
-**R code for Lancet-style figures**:
-
-```r
-library(ggplot2)
-
-# Lancet theme
-theme_lancet <- theme_minimal(base_size = 10) +
-  theme(
-    text = element_text(family = "Arial"),
-    axis.line = element_line(size = 0.5),
-    panel.grid.minor = element_blank()
-  )
-
-# Apply to plot
-p <- ggplot(data, aes(x, y)) +
-  geom_point() +
-  theme_lancet
-
-# Export at journal width
-ggsave("figure.png",
-       width = 183, height = 150,  # mm
-       units = "mm", dpi = 300)
-```
-
-### JAMA
-
-- **DPI**: 300-600
-- **Format**: TIFF preferred
-- **Fonts**: Arial, 8-10pt
-- **File size**: <10 MB per figure
-
-### PLoS ONE
-
-- **DPI**: 300-600
-- **Format**: PNG, TIFF, or EPS
-- **Dimensions**: Width ≤ 6.83 inches (single) or 10.05 inches (double)
-
----
-
-## Quick Reference
-
-### Package Installation
-
-```r
-# Core meta-analysis
+# Meta-analysis
 install.packages(c("meta", "metafor", "dmetar"))
 
 # Visualization
-install.packages(c("ggplot2", "patchwork", "cowplot", "ggpubr"))
+install.packages(c("ggplot2", "patchwork", "cowplot"))
 
-# Professional themes (RECOMMENDED for all projects)
-install.packages(c(
-  "hrbrthemes",   # Best typography
-  "ggthemes",     # Professional themes
-  "viridis",      # Colorblind-safe (MANDATORY)
-  "scico",        # Scientific colormaps
-  "ggsci"         # Journal palettes
-))
+# Tables
+install.packages(c("gtsummary", "gt", "flextable"))
 
-# Install ggthemr from GitHub
-# devtools::install_github("Mikata-Project/ggthemr")
-
-# Optional: TV themes (for presentations only)
-# devtools::install_github("Ryo-N7/tvthemes")
-
-# Utilities
-install.packages(c("tidyverse", "scales", "RColorBrewer"))
+# Themes & Colors
+install.packages(c("hrbrthemes", "ggsci", "viridis"))
 ```
 
-### Theme Setup Template
+**Full setup guide**: [r-guides/00-setup.md](r-guides/00-setup.md)
 
-**Copy this to the start of every analysis script**:
+---
 
+## 🎯 By Project Stage
+
+### Stage 06: Analysis
+
+**Goal**: Generate statistical plots and perform meta-analysis
+
+**Start here**:
+1. [01-forest-plots.md](r-guides/01-forest-plots.md) - Primary outcome
+2. [02-funnel-plots.md](r-guides/02-funnel-plots.md) - Publication bias
+3. [03-subgroup-plots.md](r-guides/03-subgroup-plots.md) - Subgroup analysis
+
+**Packages you'll need**:
 ```r
-#!/usr/bin/env Rscript
-# Setup: Load packages and set theme
-
-# Load packages
-library(ggplot2)
-library(hrbrthemes)  # Typography
-library(ggsci)       # Journal colors
-library(viridis)     # Colorblind-safe
-library(patchwork)   # Multi-panel
-
-# Set global theme for ALL plots
-theme_set(
-  theme_ipsum_rc(
-    base_size = 12,           # Readable text
-    axis_title_size = 14,
-    plot_title_size = 16
-  )
-)
-
-# Now all ggplot objects inherit this theme automatically
+library(meta)      # Forest plots, pooled estimates
+library(metafor)   # Advanced meta-analysis
+library(ggplot2)   # Custom plots
+library(ggsci)     # Journal colors
 ```
 
-### Template: Basic Forest Plot
+### Stage 07: Manuscript
 
+**Goal**: Assemble figures and create tables for manuscript
+
+**Start here**:
+1. [04-multi-panel.md](r-guides/04-multi-panel.md) - Combine plots into figures
+2. [05-table1-gtsummary.md](r-guides/05-table1-gtsummary.md) - Study characteristics
+3. [06-regression-tables.md](r-guides/06-regression-tables.md) - Statistical tables
+
+**Packages you'll need**:
 ```r
-library(meta)
-
-# Read data
-data <- read.csv("05_extraction/extraction.csv")
-
-# Meta-analysis
-res <- metabin(
-  event.e, n.e, event.c, n.c,
-  data = data,
-  studlab = study_id,
-  sm = "RR"
-)
-
-# Export forest plot
-png("figure.png", width=10, height=8, units="in", res=300)
-forest(res)
-dev.off()
-```
-
-### Template: Multi-Panel with patchwork
-
-```r
-library(patchwork)
-
-# Combine plots
-combined <- p1 / p2 / p3 +
-  plot_annotation(
-    title = "Efficacy Outcomes",
-    tag_levels = "A"
-  )
-
-# Export
-ggsave("combined.png", width=10, height=12, dpi=300)
+library(patchwork)   # Multi-panel figures
+library(gtsummary)   # Professional tables
+library(gt)          # HTML export
+library(flextable)   # Word export
 ```
 
 ---
 
-## Additional Resources
+## 📚 R Package Ecosystem
 
-### Tutorials
+When you need more information about a package, consult these resources:
 
-1. **Doing Meta-Analysis in R** (Harrer et al.)
-   - https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/
-   - Comprehensive guide for meta-analysis in R
+### Core Repositories
 
-2. **R Graphics Cookbook** (Chang)
-   - https://r-graphics.org/
-   - ggplot2 examples for publication
+1. **[CRAN](https://cran.r-project.org/)** — Official R package repository
+   - Search for packages
+   - Read documentation
+   - Example: https://cran.r-project.org/web/packages/meta/
 
-3. **Data Visualization with R** (Kabacoff)
-   - https://rkabacoff.github.io/datavis/
-   - Modern visualization techniques
+2. **[Tidyverse](https://www.tidyverse.org/)** — ggplot2, dplyr, tidyr
+   - Modern R packages
+   - Consistent syntax
+   - Example: https://ggplot2.tidyverse.org/
 
-### Getting Help
+3. **[R-universe](https://r-universe.dev/)** — Package search engine
+   - Search across all repositories
+   - View dependencies
+   - Example: https://r-universe.dev/search/
 
-When searching for R packages or help:
+4. **[Bioconductor](https://bioconductor.org/)** — Bioinformatics packages
+   - Specialized for biological data
+   - Example: https://bioconductor.org/packages/
 
-1. **Search CRAN**: https://cran.r-project.org/web/packages/
-2. **Search R-universe**: https://r-universe.dev/search/
-3. **Stack Overflow**: Tag questions with `[r]` and `[meta-analysis]`
-4. **RStudio Community**: https://community.rstudio.com/
+5. **[rOpenSci](https://ropensci.org/)** — Peer-reviewed scientific tools
+   - High-quality packages
+   - Example: https://ropensci.org/packages/
 
-### Package Documentation
+---
+
+## 🔍 How to Use These Guides
+
+### Progressive Disclosure Principle
+
+**Don't read everything!** Only read what you need for your current task.
+
+### Structure of Each Guide
+
+```
+# [Task Name]
+
+**When to use**: [Specific scenario]
+**Time**: [Estimated time]
+**Packages**: [Only what you need]
+
+## Quick Start
+[Copy-paste example - gets you 80% there]
+
+## Common Scenarios
+[3-5 real-world use cases]
+
+## Troubleshooting
+[Common errors and fixes]
+
+## See Also
+[Related guides]
+```
+
+### Example Workflow
+
+**Scenario**: "I need to create a forest plot and Table 1"
+
+1. Read [01-forest-plots.md](r-guides/01-forest-plots.md) → Copy Quick Start code
+2. Run the code → Get forest plot
+3. Read [05-table1-gtsummary.md](r-guides/05-table1-gtsummary.md) → Copy Quick Start code
+4. Run the code → Get Table 1
+5. **Done!** (No need to read 700+ lines of documentation)
+
+---
+
+## 📝 Common Workflows
+
+### Workflow 1: Complete Meta-Analysis Figures (2-3 hours)
 
 ```r
-# View package help
-help(package = "meta")
+# Step 1: Set up (5 min)
+source("r-guides/00-setup.md")  # Install packages
 
-# View function help
-?forest
+# Step 2: Forest plot (30 min)
+source("r-guides/01-forest-plots.md")  # Primary outcome
 
-# View vignettes
-vignette(package = "meta")
-browseVignettes("meta")
+# Step 3: Funnel plot (15 min)
+source("r-guides/02-funnel-plots.md")  # Publication bias
+
+# Step 4: Subgroup analysis (30 min)
+source("r-guides/03-subgroup-plots.md")  # Heterogeneity
+
+# Step 5: Combine (30 min)
+source("r-guides/04-multi-panel.md")  # Multi-panel figure
+```
+
+### Workflow 2: Manuscript Tables (1-2 hours)
+
+```r
+# Step 1: Table 1 (60 min)
+source("r-guides/05-table1-gtsummary.md")  # Study characteristics
+
+# Step 2: Regression table (30 min)
+source("r-guides/06-regression-tables.md")  # Statistical models
+
+# Export to Word
+# Done!
 ```
 
 ---
 
-## Theme & Color Package Comparison
+## 🎨 Design Philosophy
 
-### When to Use Each Package
+### Why Modular Guides?
 
-| Package        | Best For                 | Pros                                    | Cons                                    | Install |
-| -------------- | ------------------------ | --------------------------------------- | --------------------------------------- | ------- |
-| **hrbrthemes** | All publications         | Professional typography, minimal design | Requires font installation              | CRAN    |
-| **ggthemr**    | Quick styling            | One-line setup, applies globally        | Limited customization                   | GitHub  |
-| **ggthemes**   | Matching specific styles | Economist, WSJ, Tufte themes            | Some themes too stylized                | CRAN    |
-| **viridis**    | Color scales             | Colorblind-safe, perceptually uniform   | Limited to continuous scales            | CRAN    |
-| **scico**      | Heatmaps                 | Scientific colormaps, 30+ palettes      | Overkill for simple plots               | CRAN    |
-| **ggsci**      | Medical journals         | Exact journal color matching            | Only discrete colors                    | CRAN    |
-| **tvthemes**   | Presentations            | Fun, eye-catching                       | Not professional enough for publication | GitHub  |
+**Before** (Single 780-line file):
+- ❌ Overwhelming for beginners
+- ❌ Hard to find what you need
+- ❌ Mixes basics with advanced topics
+- ❌ Copy-paste examples buried in text
 
-### Complete Setup Example
+**After** (9 task-based guides):
+- ✅ Read only what you need (Progressive Disclosure)
+- ✅ Quick start examples first
+- ✅ Clear time estimates
+- ✅ Minimal package dependencies per guide
 
-**Master script for all meta-analysis figures**:
+### Principles Applied
 
-```r
-#!/usr/bin/env Rscript
-# master_figures.R — Generate all publication figures
+1. **Task-Based**: "Make a forest plot" not "Learn meta package"
+2. **Time-Bounded**: Each guide 10-60 minutes
+3. **Copy-Paste Ready**: Quick Start section gets you 80% there
+4. **Cross-Referenced**: Related guides linked at bottom
+5. **Scenario-Driven**: Real examples from meta-analysis projects
 
-# ============================================================
-# SETUP: Load all packages
-# ============================================================
+---
 
-library(meta)         # Meta-analysis
-library(metafor)      # Advanced meta-analysis
-library(ggplot2)      # Plotting
-library(patchwork)    # Multi-panel
-library(hrbrthemes)   # Professional theme
-library(ggsci)        # Journal colors
-library(viridis)      # Colorblind-safe
-library(dplyr)        # Data manipulation
+## 🆘 Getting Help
 
-# ============================================================
-# THEME CONFIGURATION
-# ============================================================
+### Within This Documentation
 
-# Set global theme for consistency
-theme_set(
-  theme_ipsum_rc(
-    base_size = 12,
-    axis_title_size = 14,
-    plot_title_size = 16,
-    strip_text_size = 12
-  ) +
-  theme(
-    legend.position = "bottom",
-    plot.title.position = "plot"
-  )
-)
+1. **Start with README**: [r-guides/README.md](r-guides/README.md)
+2. **Find your task**: Use table above
+3. **Read ONE guide**: Don't try to learn everything
+4. **Follow Quick Start**: Copy-paste and modify
 
-# ============================================================
-# COLOR PALETTES
-# ============================================================
+### External Resources
 
-# Define palettes for consistency
-colors_lancet <- pal_lancet()(9)      # For categorical (up to 9 groups)
-colors_nejm <- pal_nejm()(8)          # For medical outcomes
-colors_jco <- pal_jco()(10)           # For oncology
-palette_viridis <- "plasma"           # For continuous
+1. **Package website**: Click links in each guide
+2. **R help system**: `?function_name` in R console
+3. **Package vignettes**: `browseVignettes("package_name")`
+4. **CRAN search**: https://cran.r-project.org/
 
-# ============================================================
-# DATA LOADING
-# ============================================================
+---
 
-data <- read.csv("../05_extraction/extraction.csv")
+## 📊 Quality Standards
 
-# ============================================================
-# FIGURE 1: PRIMARY OUTCOME (Forest Plot)
-# ============================================================
+All guides ensure:
 
-res_pcr <- metabin(
-  event.e = events_pcr_ici,
-  n.e = total_ici,
-  event.c = events_pcr_control,
-  n.c = total_control,
-  data = data,
-  studlab = study_id,
-  sm = "RR"
-)
+- ✅ 300 DPI minimum for figures
+- ✅ Colorblind-safe palettes (viridis, ggsci)
+- ✅ Journal-quality themes (hrbrthemes)
+- ✅ Reproducible workflows
+- ✅ Clear variable labels
+- ✅ Multi-format export (PNG, PDF, Word, HTML)
 
-# Export as PNG (base R plot)
-png("../07_manuscript/figures/figure1_pcr.png",
-    width = 10, height = 8, units = "in", res = 300)
+---
 
-forest(res_pcr,
-       col.square = colors_lancet[1],
-       col.diamond = colors_lancet[2],
-       print.I2 = TRUE,
-       print.pval.Q = TRUE)
+## 🔄 Maintenance
 
-dev.off()
+**These guides evolve**. When you discover a better pattern:
 
-# ============================================================
-# FIGURE 2: SUBGROUP ANALYSIS (ggplot)
-# ============================================================
+1. Create a new guide (copy template)
+2. Update cross-references
+3. Update this README
 
-p_subgroup <- ggplot(subgroup_data, aes(x = subgroup, y = rr, fill = subgroup)) +
-  geom_col() +
-  geom_errorbar(aes(ymin = ci_lower, ymax = ci_upper), width = 0.2) +
-  scale_fill_lancet() +              # Use Lancet colors
-  labs(
-    title = "Subgroup Analysis: Pathologic Complete Response",
-    x = "Subgroup",
-    y = "Risk Ratio (95% CI)"
-  )
-
-ggsave("../07_manuscript/figures/figure2_subgroup.png",
-       width = 10, height = 6, dpi = 300)
-
-# ============================================================
-# FIGURE 3: PUBLICATION BIAS (Funnel Plot)
-# ============================================================
-
-funnel_data <- data.frame(
-  se = res_pcr$seTE,
-  effect = res_pcr$TE
-)
-
-p_funnel <- ggplot(funnel_data, aes(x = effect, y = se)) +
-  geom_point(aes(color = se), size = 3) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
-  scale_color_viridis_c(option = "plasma") +  # Colorblind-safe gradient
-  scale_y_reverse() +
-  labs(
-    title = "Funnel Plot: Publication Bias Assessment",
-    x = "Log Risk Ratio",
-    y = "Standard Error",
-    color = "SE"
-  )
-
-ggsave("../07_manuscript/figures/figure3_funnel.png",
-       width = 8, height = 8, dpi = 300)
-
-# ============================================================
-# FIGURE 4: MULTI-PANEL (Combine all outcomes)
-# ============================================================
-
-combined <- p_pcr / p_efs / p_os +
-  plot_annotation(
-    title = "Efficacy Outcomes: ICI vs Control",
-    tag_levels = "A"
-  )
-
-ggsave("../07_manuscript/figures/figure4_efficacy.png",
-       width = 10, height = 14, dpi = 300)
-
-# ============================================================
-# SUMMARY
-# ============================================================
-
-cat("\n✅ All figures generated successfully!\n")
-cat("   - Figure 1: Primary outcome (forest plot)\n")
-cat("   - Figure 2: Subgroup analysis\n")
-cat("   - Figure 3: Funnel plot\n")
-cat("   - Figure 4: Multi-panel efficacy\n")
-cat("\n📁 Output directory: 07_manuscript/figures/\n")
-cat("📏 Resolution: 300 DPI (publication quality)\n")
-cat("🎨 Theme: hrbrthemes + Lancet colors\n")
-```
-
-### Why These Packages Matter
-
-**Before (default ggplot2)**:
-
-```r
-# Default ggplot2 — looks amateur
-ggplot(data, aes(x, y, color = group)) +
-  geom_point()
-# Result: Gray background, poor contrast, generic colors
-```
-
-**After (professional themes)**:
-
-```r
-# With hrbrthemes + ggsci — publication-ready
-library(hrbrthemes)
-library(ggsci)
-
-ggplot(data, aes(x, y, color = group)) +
-  geom_point(size = 3) +
-  scale_color_lancet() +
-  theme_ipsum_rc() +
-  labs(title = "Professional Figure")
-
-# Result: Clean background, readable fonts, journal colors
-# Time saved: 30-60 minutes per figure (no manual tweaking)
-```
-
-**Key Benefits**:
-
-1. **Speed**: No trial-and-error with colors and fonts
-2. **Consistency**: All figures have matching style
-3. **Accessibility**: Colorblind-safe palettes prevent exclusion
-4. **Credibility**: Professional appearance increases trust
-5. **Journal alignment**: Match target journal aesthetics
+**Template**: See any existing guide for structure
 
 ---
 
 **Last Updated**: 2024-02-07
 **Maintainer**: See CLAUDE.md for project instructions
+**Full guide list**: [r-guides/README.md](r-guides/README.md)

@@ -576,7 +576,10 @@ uv run ../../ma-end-to-end/scripts/checkpoint.py --restore --name pre-analysis -
 **Essential**:
 - [Time Investment Guidance](docs/TIME_GUIDANCE.md) - Realistic timeline expectations (22-32 hours)
 - [Manuscript Assembly](docs/MANUSCRIPT_ASSEMBLY.md) - Stage 07 complete workflow (6-8 hours)
-- [R Figure Generation](docs/R_FIGURE_GUIDE.md) - Publication-quality figures with R (300 DPI)
+- [R Figure Generation](docs/R_FIGURE_GUIDE.md) - Task-based guides (Progressive Disclosure)
+  - [Forest Plots](docs/r-guides/01-forest-plots.md) - 15-30 min
+  - [Table 1](docs/r-guides/05-table1-gtsummary.md) - 30-60 min
+  - [Multi-Panel Figures](docs/r-guides/04-multi-panel.md) - 15-20 min
 - [Journal Formatting](docs/JOURNAL_FORMATTING.md) - Lancet/JAMA/Nature Medicine requirements
 
 **Reference**:
