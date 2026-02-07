@@ -380,14 +380,14 @@ ggsave("figures/forest_plot.png", width = 10, height = 6, dpi = 300)
 
 ### 常見錯誤與修正
 
-| ❌ 不要這樣做 | ✅ 應該這樣做 | 原因 |
-|--------------|------------|------|
-| 使用預設色彩 | viridis/ggsci 色彩 | 色盲友善 |
-| 省略軸標籤 | 使用 `labs()` | 清晰度 |
-| 寬格式資料 | Tidy 長格式 | 易於映射 |
-| 重複美學定義 | 全域定義在 `ggplot()` | DRY 原則 |
-| 預設灰色主題 | `theme_minimal()` | 專業外觀 |
-| 不必要的網格線 | 用 `theme()` 移除 | 減少視覺雜訊 |
+| ❌ 不要這樣做  | ✅ 應該這樣做         | 原因         |
+| -------------- | --------------------- | ------------ |
+| 使用預設色彩   | viridis/ggsci 色彩    | 色盲友善     |
+| 省略軸標籤     | 使用 `labs()`         | 清晰度       |
+| 寬格式資料     | Tidy 長格式           | 易於映射     |
+| 重複美學定義   | 全域定義在 `ggplot()` | DRY 原則     |
+| 預設灰色主題   | `theme_minimal()`     | 專業外觀     |
+| 不必要的網格線 | 用 `theme()` 移除     | 減少視覺雜訊 |
 
 ### 快速參考
 
@@ -485,6 +485,223 @@ p <- ggplot(data, aes(x, y, fill=value)) +
   theme_minimal()
 
 ggsave("figure.png", width=10, height=8, dpi=300)
+```
+
+### 5. 發表級表格 (使用 gtsummary)
+
+**gtsummary** 是製作專業摘要表格的必備套件，在 meta-analysis 手稿中至關重要。
+
+#### 安裝
+
+```r
+install.packages("gtsummary")
+
+# 建議搭配套件
+install.packages(c("gt", "flextable", "kableExtra"))
+```
+
+#### 基本表格建立
+
+```r
+library(gtsummary)
+library(dplyr)
+
+# 載入研究特性資料
+data <- read.csv("05_extraction/extraction.csv")
+
+# 表格 1: 研究特性
+tbl_baseline <- data %>%
+  select(age_mean, female_pct, stage_iii_pct, pdl1_positive_pct) %>%
+  tbl_summary(
+    label = list(
+      age_mean ~ "年齡（歲）",
+      female_pct ~ "女性（%）",
+      stage_iii_pct ~ "第三期（%）",
+      pdl1_positive_pct ~ "PD-L1 陽性（%）"
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ 1,
+      all_categorical() ~ 0
+    )
+  ) %>%
+  bold_labels() %>%
+  modify_caption("表格 1. 納入研究的基線特性")
+
+# 匯出為 Word
+tbl_baseline %>%
+  as_flex_table() %>%
+  flextable::save_as_docx(path = "07_manuscript/tables/table1.docx")
+
+# 匯出為 HTML (用於 Quarto)
+tbl_baseline %>%
+  as_gt() %>%
+  gt::gtsave("07_manuscript/tables/table1.html")
+```
+
+#### 比較表格（附 P 值）
+
+```r
+# 表格 2: ICI vs 對照組比較
+tbl_comparison <- data %>%
+  select(treatment_arm, age_mean, female_pct, response_rate) %>%
+  tbl_summary(
+    by = treatment_arm,  # 按治療分組
+    label = list(
+      age_mean ~ "年齡（歲）",
+      female_pct ~ "女性（%）",
+      response_rate ~ "反應率（%）"
+    ),
+    statistic = list(all_continuous() ~ "{mean} ({sd})")
+  ) %>%
+  add_p(
+    test = list(
+      all_continuous() ~ "t.test",
+      all_categorical() ~ "chisq.test"
+    )
+  ) %>%
+  add_overall() %>%  # 加入整體欄位
+  add_n() %>%  # 加入樣本數
+  bold_labels() %>%
+  italicize_levels() %>%
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**治療組別**")
+
+# 套用 JAMA 期刊風格
+tbl_comparison %>%
+  theme_gtsummary_journal(journal = "jama")
+```
+
+#### 迴歸表格
+
+```r
+# 單變量迴歸
+tbl_uv <- data %>%
+  select(outcome, age, sex, stage, pdl1_status) %>%
+  tbl_uvregression(
+    method = glm,
+    y = outcome,
+    method.args = list(family = binomial),
+    exponentiate = TRUE,  # 顯示 OR 而非 log-OR
+    label = list(
+      age ~ "年齡（每年）",
+      sex ~ "性別（女性 vs 男性）",
+      stage ~ "分期",
+      pdl1_status ~ "PD-L1 狀態"
+    )
+  ) %>%
+  bold_labels() %>%
+  bold_p(t = 0.05)
+
+# 多變量迴歸
+model_mv <- glm(outcome ~ age + sex + stage + pdl1_status,
+                data = data, family = binomial)
+
+tbl_mv <- tbl_regression(
+  model_mv,
+  exponentiate = TRUE,
+  label = list(
+    age ~ "年齡（每年）",
+    sex ~ "性別（女性 vs 男性）",
+    stage ~ "分期",
+    pdl1_status ~ "PD-L1 狀態"
+  )
+) %>%
+  add_global_p() %>%  # 加入整體 p 值
+  bold_labels() %>%
+  bold_p(t = 0.05)
+
+# 合併單變量與多變量表格
+tbl_merged <- tbl_merge(
+  tbls = list(tbl_uv, tbl_mv),
+  tab_spanner = c("**單變量**", "**多變量**")
+)
+```
+
+#### 期刊特定格式
+
+```r
+# JAMA 風格
+tbl %>% theme_gtsummary_journal(journal = "jama")
+
+# Lancet 風格
+tbl %>% theme_gtsummary_journal(journal = "lancet")
+
+# NEJM 風格
+tbl %>% theme_gtsummary_journal(journal = "nejm")
+```
+
+#### gtsummary 最佳實踐
+
+**表格建立**:
+```r
+# ✅ 好：乾淨的變數選擇
+data %>%
+  select(age, sex, stage) %>%  # 只選分析變數
+  tbl_summary()
+
+# ❌ 壞：包含 ID 欄位
+data %>%
+  tbl_summary()  # 包含 patient_id, date_enrolled 等
+```
+
+**自訂統計量**:
+```r
+# ✅ 好：明確的統計量
+tbl_summary(
+  statistic = list(
+    all_continuous() ~ "{median} ({p25}, {p75})",  # 中位數（IQR）
+    all_categorical() ~ "{n} ({p}%)"
+  )
+)
+```
+
+**P 值**:
+```r
+# ✅ 好：適當的檢定選擇
+add_p(
+  test = list(
+    all_continuous() ~ "wilcox.test",  # 非參數檢定
+    all_categorical() ~ "fisher.test"  # 小樣本精確檢定
+  )
+)
+```
+
+**常見錯誤**:
+
+| ❌ 不要這樣做 | ✅ 應該這樣做 | 原因 |
+|--------------|------------|------|
+| 包含 ID/日期欄位 | 先篩選分析變數 | 表格更乾淨 |
+| 使用預設欄位名稱 | 提供 `label` 清單 | 讀者易讀 |
+| 依賴自動檢定 | 指定 `test` 參數 | 控制假設 |
+| 忘記 `exponentiate = TRUE` | 迴歸模型必用 | 顯示 OR/HR |
+| 忽略遺漏值處理 | 設定 `missing` | 控制呈現 |
+
+#### 快速參考：gtsummary
+
+```r
+# === 基本結構 ===
+data %>%
+  select(vars) %>%                    # 選擇變數
+  tbl_summary(
+    by = group_var,                   # 分層
+    label = list(...),                # 變數標籤
+    statistic = list(...)             # 統計量
+  ) %>%
+  add_p() %>%                         # P 值
+  add_overall() %>%                   # 整體欄位
+  bold_labels() %>%                   # 格式化
+  theme_gtsummary_journal("jama")     # 期刊風格
+
+# === 迴歸 ===
+tbl_uvregression(method = glm, exponentiate = TRUE) # 單變量
+tbl_regression(model, exponentiate = TRUE)          # 多變量
+
+# === 匯出 ===
+as_gt() %>% gt::gtsave("file.html")                # HTML
+as_flex_table() %>% flextable::save_as_docx()      # Word
 ```
 
 ---

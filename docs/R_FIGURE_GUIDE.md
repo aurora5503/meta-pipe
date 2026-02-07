@@ -582,16 +582,16 @@ ggsave("figures/forest_plot.png",
 
 ### Common Mistakes to Avoid
 
-| ❌ Don't Do This | ✅ Do This Instead | Why |
-|------------------|-------------------|-----|
-| Use default colors | Use viridis/ggsci palettes | Colorblind accessibility |
-| Omit axis labels | Always use `labs()` | Clarity for readers |
-| Use `geom_bar(stat="identity")` | Use `geom_col()` | More concise |
-| Wide data format | Tidy (long) format | Easier to map aesthetics |
-| Repeat aesthetics in each layer | Define globally in `ggplot()` | DRY principle |
-| Default theme with gray background | `theme_minimal()` or custom | Professional appearance |
-| Include unnecessary gridlines | Remove with `theme()` | Reduce visual clutter |
-| Hard-code values | Use scales with explicit breaks | Precision and control |
+| ❌ Don't Do This                   | ✅ Do This Instead              | Why                      |
+| ---------------------------------- | ------------------------------- | ------------------------ |
+| Use default colors                 | Use viridis/ggsci palettes      | Colorblind accessibility |
+| Omit axis labels                   | Always use `labs()`             | Clarity for readers      |
+| Use `geom_bar(stat="identity")`    | Use `geom_col()`                | More concise             |
+| Wide data format                   | Tidy (long) format              | Easier to map aesthetics |
+| Repeat aesthetics in each layer    | Define globally in `ggplot()`   | DRY principle            |
+| Default theme with gray background | `theme_minimal()` or custom     | Professional appearance  |
+| Include unnecessary gridlines      | Remove with `theme()`           | Reduce visual clutter    |
+| Hard-code values                   | Use scales with explicit breaks | Precision and control    |
 
 ### Quick Reference Card
 
@@ -833,6 +833,383 @@ p <- ggplot(rob_long, aes(x = domain, fill = judgement)) +
 
 ggsave("07_manuscript/figures/figure4_rob.png",
        plot = p, width = 10, height = 6, dpi = 300)
+```
+
+### 6. Publication-Ready Tables with gtsummary
+
+**gtsummary** is essential for creating professional summary tables in meta-analysis manuscripts.
+
+#### Installation
+
+```r
+install.packages("gtsummary")
+
+# Recommended companion packages
+install.packages(c("gt", "flextable", "kableExtra"))
+```
+
+#### Basic Table Creation
+
+```r
+library(gtsummary)
+library(dplyr)
+
+# Load study characteristics data
+data <- read.csv("05_extraction/extraction.csv")
+
+# Table 1: Study Characteristics
+tbl_baseline <- data %>%
+  select(age_mean, female_pct, stage_iii_pct, pdl1_positive_pct) %>%
+  tbl_summary(
+    label = list(
+      age_mean ~ "Age (years)",
+      female_pct ~ "Female (%)",
+      stage_iii_pct ~ "Stage III (%)",
+      pdl1_positive_pct ~ "PD-L1 positive (%)"
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      all_continuous() ~ 1,
+      all_categorical() ~ 0
+    )
+  ) %>%
+  bold_labels() %>%
+  modify_caption("Table 1. Baseline Characteristics of Included Studies")
+
+# Export to Word
+tbl_baseline %>%
+  as_flex_table() %>%
+  flextable::save_as_docx(path = "07_manuscript/tables/table1.docx")
+
+# Export to HTML (for Quarto)
+tbl_baseline %>%
+  as_gt() %>%
+  gt::gtsave("07_manuscript/tables/table1.html")
+```
+
+#### Comparison Tables with P-values
+
+```r
+# Table 2: Compare ICI vs Control
+tbl_comparison <- data %>%
+  select(treatment_arm, age_mean, female_pct, response_rate) %>%
+  tbl_summary(
+    by = treatment_arm,  # Stratify by treatment
+    label = list(
+      age_mean ~ "Age (years)",
+      female_pct ~ "Female (%)",
+      response_rate ~ "Response Rate (%)"
+    ),
+    statistic = list(all_continuous() ~ "{mean} ({sd})")
+  ) %>%
+  add_p(
+    test = list(
+      all_continuous() ~ "t.test",
+      all_categorical() ~ "chisq.test"
+    )
+  ) %>%
+  add_overall() %>%  # Add overall column
+  add_n() %>%  # Add sample size
+  bold_labels() %>%
+  italicize_levels() %>%
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Treatment Arm**")
+
+# Apply JAMA journal style
+tbl_comparison %>%
+  theme_gtsummary_journal(journal = "jama")
+```
+
+#### Regression Tables
+
+```r
+library(survival)
+
+# Univariate regression
+tbl_uv <- data %>%
+  select(outcome, age, sex, stage, pdl1_status) %>%
+  tbl_uvregression(
+    method = glm,
+    y = outcome,
+    method.args = list(family = binomial),
+    exponentiate = TRUE,  # Show OR instead of log-OR
+    label = list(
+      age ~ "Age (per year)",
+      sex ~ "Sex (Female vs Male)",
+      stage ~ "Stage",
+      pdl1_status ~ "PD-L1 Status"
+    )
+  ) %>%
+  bold_labels() %>%
+  bold_p(t = 0.05)
+
+# Multivariable regression
+model_mv <- glm(outcome ~ age + sex + stage + pdl1_status,
+                data = data,
+                family = binomial)
+
+tbl_mv <- tbl_regression(
+  model_mv,
+  exponentiate = TRUE,
+  label = list(
+    age ~ "Age (per year)",
+    sex ~ "Sex (Female vs Male)",
+    stage ~ "Stage",
+    pdl1_status ~ "PD-L1 Status"
+  )
+) %>%
+  add_global_p() %>%  # Add global p-values for categorical variables
+  bold_labels() %>%
+  bold_p(t = 0.05)
+
+# Merge univariate and multivariable tables
+tbl_regression_merged <- tbl_merge(
+  tbls = list(tbl_uv, tbl_mv),
+  tab_spanner = c("**Univariate**", "**Multivariable**")
+) %>%
+  modify_caption("Table 3. Univariate and Multivariable Analysis")
+```
+
+#### Subgroup Analysis Tables
+
+```r
+# Stack subgroup analyses
+tbl_subgroup_age <- data %>%
+  filter(age_group == "<65") %>%
+  tbl_summary(by = treatment_arm) %>%
+  add_p() %>%
+  modify_caption("Age < 65 years")
+
+tbl_subgroup_age_old <- data %>%
+  filter(age_group == "≥65") %>%
+  tbl_summary(by = treatment_arm) %>%
+  add_p() %>%
+  modify_caption("Age ≥ 65 years")
+
+# Stack vertically
+tbl_subgroup_stacked <- tbl_stack(
+  tbls = list(tbl_subgroup_age, tbl_subgroup_age_old),
+  group_header = c("Age < 65 years", "Age ≥ 65 years")
+)
+```
+
+#### Journal-Specific Formatting
+
+```r
+# JAMA style
+tbl %>%
+  theme_gtsummary_journal(journal = "jama")
+
+# Lancet style
+tbl %>%
+  theme_gtsummary_journal(journal = "lancet")
+
+# NEJM style
+tbl %>%
+  theme_gtsummary_journal(journal = "nejm")
+
+# JAMA Oncology
+tbl %>%
+  theme_gtsummary_journal(journal = "jama") %>%
+  modify_header(label ~ "**Characteristic**")
+```
+
+#### Output Format Decision Tree
+
+```
+Which output format?
+├─ HTML/PDF (Quarto document)
+│  └─ Use as_gt()
+│     └─ tbl %>% as_gt() %>% gt::gtsave("table.html")
+│
+├─ Word/PowerPoint
+│  └─ Use as_flex_table()
+│     └─ tbl %>% as_flex_table() %>% flextable::save_as_docx()
+│
+├─ LaTeX/PDF (R Markdown)
+│  └─ Use as_kable_extra()
+│     └─ tbl %>% as_kable_extra()
+│
+└─ Copy-paste to manuscript
+   └─ View in RStudio Viewer, copy directly
+```
+
+#### Best Practices for gtsummary
+
+**Table Creation**:
+```r
+# ✅ Good: Clean variable selection
+data %>%
+  select(age, sex, stage) %>%  # Only analytic variables
+  tbl_summary()
+
+# ❌ Bad: Including ID columns
+data %>%
+  tbl_summary()  # Includes patient_id, date_enrolled, etc.
+```
+
+**Customization**:
+```r
+# ✅ Good: Clear labels
+tbl_summary(
+  label = list(
+    age_yrs ~ "Age (years)",
+    bmi_kgm2 ~ "BMI (kg/m²)"
+  )
+)
+
+# ❌ Bad: Using raw column names
+tbl_summary()  # Shows "age_yrs", "bmi_kgm2"
+```
+
+**Statistics**:
+```r
+# ✅ Good: Explicit statistics
+tbl_summary(
+  statistic = list(
+    all_continuous() ~ "{median} ({p25}, {p75})",  # Median (IQR)
+    all_categorical() ~ "{n} ({p}%)"
+  )
+)
+
+# ✅ Good: Multi-line continuous summaries
+tbl_summary(
+  type = list(age ~ "continuous2"),
+  statistic = list(age ~ c("{mean} ({sd})", "{median} ({p25}, {p75})"))
+)
+```
+
+**P-values**:
+```r
+# ✅ Good: Appropriate test selection
+add_p(
+  test = list(
+    all_continuous() ~ "wilcox.test",  # Non-parametric
+    all_categorical() ~ "fisher.test"  # Exact test for small n
+  )
+)
+
+# ✅ Good: Handle missing data
+tbl_summary(
+  missing = "no",  # Don't show missing row
+  # OR
+  missing_text = "Missing"  # Custom text for missing
+)
+```
+
+**Common Pitfalls**:
+
+| ❌ Don't Do This | ✅ Do This Instead | Why |
+|------------------|-------------------|-----|
+| Include ID/date columns | Filter to analytic variables first | Cleaner tables |
+| Use default column names | Provide `label` list | Readable for readers |
+| Rely on auto-detected tests | Specify `test` argument | Control for assumptions |
+| Forget `exponentiate = TRUE` | Always use for logistic/Cox | Show OR/HR, not log-OR |
+| Use default missing handling | Set `missing` or `missing_text` | Control presentation |
+| Mix `add_p()` with small n | Use exact tests | Avoid invalid p-values |
+
+#### Complete Example: Table 1 for Meta-Analysis
+
+```r
+library(gtsummary)
+library(dplyr)
+library(gt)
+
+# Load study-level data
+studies <- read.csv("05_extraction/extraction.csv")
+
+# Prepare data
+studies_clean <- studies %>%
+  select(
+    study_id,
+    publication_year,
+    n_total,
+    age_median,
+    female_pct,
+    stage_iii_pct,
+    pdl1_positive_pct,
+    ici_type,
+    follow_up_months
+  )
+
+# Create Table 1: Study Characteristics
+table1 <- studies_clean %>%
+  tbl_summary(
+    label = list(
+      publication_year ~ "Publication Year",
+      n_total ~ "Sample Size",
+      age_median ~ "Median Age (years)",
+      female_pct ~ "Female (%)",
+      stage_iii_pct ~ "Stage III (%)",
+      pdl1_positive_pct ~ "PD-L1 Positive (%)",
+      ici_type ~ "ICI Type",
+      follow_up_months ~ "Median Follow-up (months)"
+    ),
+    type = list(
+      age_median ~ "continuous2",  # Multi-line
+      follow_up_months ~ "continuous2"
+    ),
+    statistic = list(
+      all_continuous() ~ c("{median} ({p25}, {p75})", "{min} - {max}"),
+      all_categorical() ~ "{n} ({p}%)"
+    ),
+    digits = list(
+      age_median ~ 1,
+      female_pct ~ 0,
+      follow_up_months ~ 1
+    ),
+    missing = "no"
+  ) %>%
+  bold_labels() %>%
+  italicize_levels() %>%
+  modify_header(label ~ "**Characteristic**") %>%
+  modify_caption("**Table 1. Characteristics of Included Studies (N = 5 RCTs)**") %>%
+  modify_footnote(all_stat_cols() ~ "Median (IQR) or n (%)") %>%
+  theme_gtsummary_journal(journal = "jama")
+
+# Export to multiple formats
+# HTML (for Quarto)
+table1 %>%
+  as_gt() %>%
+  gt::gtsave("07_manuscript/tables/table1.html")
+
+# Word (for submission)
+table1 %>%
+  as_flex_table() %>%
+  flextable::save_as_docx(path = "07_manuscript/tables/table1.docx")
+
+# Print to console (for preview)
+print(table1)
+```
+
+#### Quick Reference: gtsummary
+
+```r
+# === BASIC STRUCTURE ===
+data %>%
+  select(vars) %>%                    # Select variables
+  tbl_summary(
+    by = group_var,                   # Stratify
+    label = list(...),                # Variable labels
+    statistic = list(...)             # Statistics
+  ) %>%
+  add_p() %>%                         # P-values
+  add_overall() %>%                   # Overall column
+  add_n() %>%                         # Sample size
+  bold_labels() %>%                   # Format
+  theme_gtsummary_journal("jama")     # Journal style
+
+# === REGRESSION ===
+tbl_uvregression(method = glm, exponentiate = TRUE) # Univariate
+tbl_regression(model, exponentiate = TRUE)          # Multivariable
+add_global_p()                                      # Global p-values
+
+# === EXPORT ===
+as_gt() %>% gt::gtsave("file.html")                # HTML
+as_flex_table() %>% flextable::save_as_docx()      # Word
+as_kable_extra()                                   # LaTeX
 ```
 
 ---
