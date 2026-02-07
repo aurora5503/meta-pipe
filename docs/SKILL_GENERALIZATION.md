@@ -22,6 +22,7 @@ git status
 ```
 
 Identify:
+
 - New scripts created
 - New workflows established
 - Documentation written
@@ -30,12 +31,14 @@ Identify:
 ### 2. Identify Reusable Patterns
 
 Ask:
+
 - ✅ Was this workflow used multiple times in the project?
 - ✅ Would future projects benefit from this?
 - ✅ Can this be generalized beyond this specific topic?
 - ✅ Does this save significant time (>1 hour)?
 
 Red flags (don't generalize):
+
 - ❌ One-off solutions for specific edge cases
 - ❌ Highly project-specific code
 - ❌ Temporary workarounds
@@ -60,12 +63,12 @@ Skill frontmatter format:
 ---
 name: skill-name
 description: Brief description (1-2 sentences)
-context: fork  # or preserve
-agent: general-purpose  # or specific agent
+context: fork # or preserve
+agent: general-purpose # or specific agent
 ---
 ```
 
-### 4. Document in SKILLS_LEARNED_FROM_*.md
+### 4. Document in SKILLS*LEARNED_FROM*\*.md
 
 Create retrospective document:
 
@@ -73,6 +76,7 @@ Create retrospective document:
 # Skills Learned from [Project Name]
 
 ## Project Context
+
 - What: Brief project description
 - Completion: X% complete, Y hours total
 - Key metrics: N studies, M patients, etc.
@@ -80,12 +84,14 @@ Create retrospective document:
 ## Skills Created
 
 ### 1. [Skill Name]
+
 - **Purpose**: What problem does it solve?
 - **Time savings**: Quantified (X hours → Y hours, Z% improvement)
 - **Use cases**: When to use this skill
 - **Validated on**: Actual project results
 
 ## Impact Assessment
+
 - Quantitative: Time savings, error reduction
 - Qualitative: Workflow improvements, reproducibility
 ```
@@ -109,6 +115,7 @@ git push
 ### 6. Create Summary Report for User
 
 Write user-facing report:
+
 - What was generalized
 - How to use the new skills
 - Expected ROI (time savings on next project)
@@ -123,6 +130,7 @@ Write user-facing report:
 **From**: TNBC meta-analysis (99% complete, 5 RCTs, N=2402)
 
 **Created**:
+
 1. **meta-manuscript-assembly** skill (1,471 lines)
    - 5-phase workflow (Tables → Figures → References → Legends → QA)
    - Time savings: 50% (16h → 8h)
@@ -133,6 +141,7 @@ Write user-facing report:
    - Time savings: 1-2 hours vs PowerPoint
 
 **Impact**:
+
 - Time investment to generalize: 2 hours
 - ROI: First use saves 8-12 hours
 - Payback: Immediate (first project)
@@ -157,6 +166,7 @@ Before finalizing skill:
 ## When NOT to Generalize
 
 Don't create a skill if:
+
 - ❌ Used only once in the project
 - ❌ Highly specific to this topic (e.g., TNBC-only code)
 - ❌ Temporary workaround for a bug
@@ -164,6 +174,7 @@ Don't create a skill if:
 - ❌ Too complex to maintain (>2,000 lines without clear structure)
 
 Instead:
+
 - ✅ Document in project README
 - ✅ Add to project LESSONS_LEARNED.md
 - ✅ Keep as reference for similar future projects

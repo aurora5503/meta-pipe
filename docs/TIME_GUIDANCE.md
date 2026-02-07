@@ -60,6 +60,7 @@ Based on actual completion (N=2402 patients, 5 RCTs):
 ### When to Use Claude Skills vs Manual Work
 
 **Use skills** (60-80% time savings):
+
 - Manuscript structure creation
 - Table template generation
 - Figure assembly automation
@@ -67,6 +68,7 @@ Based on actual completion (N=2402 patients, 5 RCTs):
 - PRISMA checklist filling
 
 **Do manually** (requires domain expertise):
+
 - Clinical interpretation
 - Discussion points selection
 - Figure legend scientific details
@@ -78,12 +80,14 @@ Based on actual completion (N=2402 patients, 5 RCTs):
 **Prerequisite**: Claude CLI or similar LLM with PDF processing
 
 **Workflow** (Stage 05):
+
 1. Extract PDF text: `extract_pdf_text.py`
 2. LLM extraction: `llm_extract_cli.py --cli claude`
 3. Manual review: Edit extraction.csv
 4. Validation: `validate_extraction.py`
 
 **Results**:
+
 - 100% success rate (all PDFs processed)
 - 65-70% time savings vs manual
 - Some fields need manual correction

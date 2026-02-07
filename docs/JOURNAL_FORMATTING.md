@@ -18,6 +18,7 @@
 - **Tables**: Maximum 5
 
 **Submission requirements**:
+
 - Structured abstract (Background, Methods, Findings, Interpretation)
 - PRISMA 2020 checklist mandatory
 - PRISMA flow diagram required
@@ -35,6 +36,7 @@
 - **Tables**: Maximum 4
 
 **Submission requirements**:
+
 - Structured abstract (Importance, Objective, Data Sources, Study Selection, Data Extraction and Synthesis, Main Outcomes and Measures, Results, Conclusions and Relevance)
 - PRISMA checklist mandatory
 - Trial registration required
@@ -51,6 +53,7 @@
 - **Emphasis**: Clinical impact, translational relevance
 
 **Submission requirements**:
+
 - Brief abstract (no subheadings)
 - Extended Data figures allowed (beyond 6 main figures)
 - Data deposition required

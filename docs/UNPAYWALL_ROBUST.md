@@ -12,6 +12,7 @@ Error: requests.exceptions.HTTPError: 422 Client Error: Unprocessable Entity
 ```
 
 這個錯誤會導致：
+
 - ❌ 整個批次處理中斷
 - ❌ 其他 89 個有效 DOI 無法查詢
 - ❌ 無法獲得 Open Access 狀態資訊
@@ -24,6 +25,7 @@ Error: requests.exceptions.HTTPError: 422 Client Error: Unprocessable Entity
 **核心改進**：
 
 1. **錯誤分類與處理**
+
    ```python
    if resp.status_code == 404:
        return {"doi": doi, "error": "not_found"}
@@ -71,28 +73,30 @@ uv run ../../ma-fulltext-management/scripts/unpaywall_fetch_robust.py \
 
 ### 參數說明
 
-| 參數 | 說明 | 預設值 |
-|------|------|--------|
-| `--in-bib` | 輸入 BibTeX 檔案 | 必填 |
-| `--email` | 聯絡 email（或使用 UNPAYWALL_EMAIL 環境變數）| 必填 |
-| `--out-csv` | 輸出 CSV 檔案 | 必填 |
-| `--out-log` | 輸出 log 檔案 | 必填 |
-| `--out-json` | 輸出完整 JSON（含錯誤統計）| 選填 |
-| `--continue-on-error` | 遇到錯誤繼續處理 | False |
-| `--max-retries` | 暫時性錯誤最大重試次數 | 3 |
-| `--sleep` | 每個請求間隔（秒）| 0.2 |
-| `--api-base` | Unpaywall API URL | https://api.unpaywall.org |
+| 參數                  | 說明                                          | 預設值                    |
+| --------------------- | --------------------------------------------- | ------------------------- |
+| `--in-bib`            | 輸入 BibTeX 檔案                              | 必填                      |
+| `--email`             | 聯絡 email（或使用 UNPAYWALL_EMAIL 環境變數） | 必填                      |
+| `--out-csv`           | 輸出 CSV 檔案                                 | 必填                      |
+| `--out-log`           | 輸出 log 檔案                                 | 必填                      |
+| `--out-json`          | 輸出完整 JSON（含錯誤統計）                   | 選填                      |
+| `--continue-on-error` | 遇到錯誤繼續處理                              | False                     |
+| `--max-retries`       | 暫時性錯誤最大重試次數                        | 3                         |
+| `--sleep`             | 每個請求間隔（秒）                            | 0.2                       |
+| `--api-base`          | Unpaywall API URL                             | https://api.unpaywall.org |
 
 ## 輸出格式
 
 ### CSV 輸出（新增欄位）
 
 原有欄位：
+
 - `record_id`, `doi`, `pmid`, `title`
 - `is_oa`, `oa_status`, `best_oa_url`, `best_oa_pdf_url`
 - `host_type`, `license`, `updated`
 
 **新增欄位**：
+
 - `error`: 錯誤類型（`not_found`, `unprocessable`, `timeout`, 等）
 - `error_detail`: 詳細錯誤訊息
 
@@ -145,17 +149,18 @@ uv run ../../ma-fulltext-management/scripts/unpaywall_fetch_robust.py \
 
 ## 錯誤類型說明
 
-| 錯誤類型 | HTTP 狀態碼 | 說明 | 處理方式 |
-|---------|-----------|------|---------|
-| `not_found` | 404 | DOI 在 Unpaywall 資料庫中不存在 | 記錄錯誤，繼續下一個 |
-| `unprocessable` | 422 | Unpaywall 無法處理此 DOI（格式或其他問題）| 記錄錯誤，繼續下一個 |
-| `timeout` | - | 請求超時（>60秒）| 重試 3 次後記錄錯誤 |
-| `rate_limited` | 429 | API 速率限制 | 自動等待並重試 |
-| `request_failed` | 其他 | 其他網路或請求錯誤 | 重試 3 次後記錄錯誤 |
+| 錯誤類型         | HTTP 狀態碼 | 說明                                       | 處理方式             |
+| ---------------- | ----------- | ------------------------------------------ | -------------------- |
+| `not_found`      | 404         | DOI 在 Unpaywall 資料庫中不存在            | 記錄錯誤，繼續下一個 |
+| `unprocessable`  | 422         | Unpaywall 無法處理此 DOI（格式或其他問題） | 記錄錯誤，繼續下一個 |
+| `timeout`        | -           | 請求超時（>60秒）                          | 重試 3 次後記錄錯誤  |
+| `rate_limited`   | 429         | API 速率限制                               | 自動等待並重試       |
+| `request_failed` | 其他        | 其他網路或請求錯誤                         | 重試 3 次後記錄錯誤  |
 
 ## 效能對比
 
 ### 原始版本
+
 ```
 ✅ 成功：0/90 (程式中斷)
 ❌ 失敗：1/90 (遇到第一個錯誤即停止)
@@ -164,6 +169,7 @@ uv run ../../ma-fulltext-management/scripts/unpaywall_fetch_robust.py \
 ```
 
 ### 穩健版本
+
 ```
 ✅ 成功：87/90 (96.7%)
 ⚠️  錯誤：3/90 (3.3%) - 已記錄詳細資訊
@@ -174,18 +180,21 @@ uv run ../../ma-fulltext-management/scripts/unpaywall_fetch_robust.py \
 ## 最佳實踐
 
 1. **首次使用**
+
    ```bash
    # 建議使用 --out-json 記錄完整資訊
    --out-json ../../04_fulltext/round-01/unpaywall_results.json
    ```
 
 2. **大量查詢**
+
    ```bash
    # 增加間隔避免 rate limit
    --sleep 0.5
    ```
 
 3. **測試用途**
+
    ```bash
    # 限制查詢數量快速測試
    --max-records 10
@@ -233,6 +242,7 @@ uv run ../../ma-fulltext-management/scripts/download_oa_pdfs.py \
 ```
 
 失敗的 DOI 可透過以下方式處理：
+
 1. 查看 CSV 的 `error` 欄位識別失敗的記錄
 2. 手動透過機構訂閱下載這些文章
 3. 或使用 Unpaywall 瀏覽器外掛嘗試
@@ -279,6 +289,7 @@ if resp.status_code == 429:
 ## 貢獻
 
 如遇到新的錯誤類型或有改進建議，請：
+
 1. 記錄錯誤的 DOI 和完整錯誤訊息
 2. 更新 `unpaywall_fetch_robust.py` 的錯誤處理
 3. 更新本文件的錯誤類型說明表

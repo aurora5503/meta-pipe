@@ -10,6 +10,7 @@
 Use the **meta-manuscript-assembly** skill (`~/.claude/skills/meta-manuscript-assembly/SKILL.md`):
 
 **Triggers**:
+
 - "complete the manuscript"
 - "prepare for journal submission"
 - "create publication tables"
@@ -45,6 +46,7 @@ Use the **meta-manuscript-assembly** skill (`~/.claude/skills/meta-manuscript-as
 **Expected output**: Complete submission-ready package in 6-8 hours
 
 **Alternative skill for figure assembly only**: Use **scientific-figure-assembly** skill when user says:
+
 - "combine plots into figure"
 - "create multi-panel figure"
 - "add panel labels"
@@ -77,30 +79,39 @@ A manuscript is "publication-ready" when:
 Based on actual project experience:
 
 ### Tables
+
 ❌ **Don't**: Create tables in Word first
 ✅ **Do**: Create markdown tables, convert later
+
 - Reason: Easier to version control, easier to update numbers
 
 ❌ **Don't**: Embed calculations in tables
 ✅ **Do**: Calculate in R, copy results only
+
 - Reason: Prevents transcription errors
 
 ### Figures
+
 ❌ **Don't**: Manually combine figures in PowerPoint
 ✅ **Do**: Use Python script (`assemble_figures.py`)
+
 - Reason: Reproducible, maintains quality, saves 1-2 hours
 
 ❌ **Don't**: Export at default DPI
 ✅ **Do**: Always specify `dpi=300` in R ggsave
+
 - Reason: Journals reject <300 DPI figures
 
 ### References
+
 ❌ **Don't**: Format references manually
 ✅ **Do**: Use BibTeX + Pandoc/Zotero
+
 - Reason: 50%+ time savings, prevents errors
 
 ❌ **Don't**: Insert citations during writing
 ✅ **Do**: Use placeholders [1], [2], format later
+
 - Reason: Faster writing flow, easier reordering
 
 ---
@@ -129,6 +140,7 @@ git commit -m "Assemble Figure 1: 3-panel efficacy (300 DPI)"
 ```
 
 **Benefits**:
+
 - Easy to rollback specific sections
 - Clear progress tracking
 - Facilitates collaboration
