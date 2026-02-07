@@ -298,6 +298,322 @@ ggsave("figures/treatment_effect.png", width = 10, height = 6, dpi = 300)
 
 ---
 
+## ggplot2 Best Practices for Meta-Analysis
+
+### Data Preparation & Mapping
+
+**Keep data in tidy (long) format**:
+
+```r
+# ❌ Bad: Wide format
+data_wide <- data.frame(
+  study = c("Trial A", "Trial B"),
+  ici_events = c(50, 60),
+  control_events = c(40, 45)
+)
+
+# ✅ Good: Long format (tidy)
+library(tidyr)
+data_long <- data_wide %>%
+  pivot_longer(
+    cols = ends_with("_events"),
+    names_to = "treatment",
+    values_to = "events"
+  )
+
+# Now easy to plot
+ggplot(data_long, aes(x = study, y = events, fill = treatment)) +
+  geom_col(position = "dodge")
+```
+
+**Map aesthetics efficiently**:
+
+```r
+# ✅ Good: Global aesthetics
+ggplot(data, aes(x = time, y = response, color = treatment)) +
+  geom_point() +
+  geom_line()
+
+# ❌ Bad: Repeating aesthetics
+ggplot(data) +
+  geom_point(aes(x = time, y = response, color = treatment)) +
+  geom_line(aes(x = time, y = response, color = treatment))
+
+# ✅ Good: Override only when needed
+ggplot(data, aes(x = time, y = response, color = treatment)) +
+  geom_point() +
+  geom_line(aes(linetype = trial))  # Only linetype differs
+```
+
+### Layering & Geoms
+
+**Build plots incrementally**:
+
+```r
+# Start simple
+p <- ggplot(data, aes(x = dose, y = response))
+
+# Add layers step by step
+p <- p + geom_point(size = 3)
+p <- p + geom_smooth(method = "loess")
+p <- p + scale_y_continuous(limits = c(0, 100))
+p <- p + labs(title = "Dose-Response Relationship")
+p <- p + theme_minimal()
+
+# View result
+p
+```
+
+**Choose correct geoms**:
+
+```r
+# ✅ Good: Use geom_col() for pre-summarized data
+summary_data <- data.frame(
+  group = c("ICI", "Control"),
+  mean_response = c(65, 45)
+)
+ggplot(summary_data, aes(x = group, y = mean_response)) +
+  geom_col()
+
+# ❌ Bad: geom_bar(stat = "identity") is verbose
+ggplot(summary_data, aes(x = group, y = mean_response)) +
+  geom_bar(stat = "identity")
+
+# ✅ Good: Use geom_jitter() for overplotting
+ggplot(data, aes(x = treatment, y = response)) +
+  geom_jitter(width = 0.2, alpha = 0.5)
+
+# ❌ Bad: geom_point() hides overlapping data
+ggplot(data, aes(x = treatment, y = response)) +
+  geom_point()
+```
+
+### Scales & Colors
+
+**Always label clearly**:
+
+```r
+# ✅ Good: Comprehensive labels
+ggplot(data, aes(x = time, y = survival, color = treatment)) +
+  geom_line() +
+  labs(
+    title = "Overall Survival by Treatment",
+    subtitle = "Kaplan-Meier estimates (N=1,174 patients)",
+    x = "Time since randomization (months)",
+    y = "Survival probability",
+    color = "Treatment arm",
+    caption = "Data from KEYNOTE-522 trial"
+  )
+
+# ❌ Bad: Default labels
+ggplot(data, aes(x = time, y = survival, color = treatment)) +
+  geom_line()
+```
+
+**Use colorblind-friendly palettes**:
+
+```r
+# ✅ Good: Viridis for continuous
+ggplot(data, aes(x, y, color = p_value)) +
+  geom_point() +
+  scale_color_viridis_c(option = "plasma")
+
+# ✅ Good: ColorBrewer for categorical
+ggplot(data, aes(x, y, fill = treatment)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Set2")
+
+# ❌ Bad: Default rainbow colors (not colorblind-safe)
+ggplot(data, aes(x, y, color = treatment)) +
+  geom_point() +
+  scale_color_manual(values = rainbow(5))
+```
+
+**Set limits and breaks explicitly**:
+
+```r
+# ✅ Good: Explicit control for precision
+ggplot(data, aes(x = dose, y = response)) +
+  geom_point() +
+  scale_x_continuous(
+    limits = c(0, 100),
+    breaks = seq(0, 100, by = 20),
+    labels = function(x) paste0(x, " mg")
+  ) +
+  scale_y_continuous(
+    limits = c(0, 1),
+    breaks = seq(0, 1, by = 0.2),
+    labels = scales::percent
+  )
+
+# ❌ Bad: Relying on defaults (may cut off data)
+ggplot(data, aes(x = dose, y = response)) +
+  geom_point()
+```
+
+### Themes & Appearance
+
+**Start with clean base theme**:
+
+```r
+# ✅ Good: Choose clean theme early
+ggplot(data, aes(x, y)) +
+  geom_point() +
+  theme_minimal()  # or theme_light(), theme_bw()
+
+# ❌ Bad: Using default gray theme
+ggplot(data, aes(x, y)) +
+  geom_point()
+```
+
+**Create reusable custom theme**:
+
+```r
+# ✅ Good: Define once, use everywhere
+my_meta_theme <- function() {
+  theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", size = 16),
+      plot.subtitle = element_text(color = "gray40"),
+      legend.position = "bottom",
+      panel.grid.minor = element_blank(),
+      axis.line = element_line(color = "black", size = 0.5)
+    )
+}
+
+# Apply to all plots
+p1 <- ggplot(data1, aes(x, y)) + geom_point() + my_meta_theme()
+p2 <- ggplot(data2, aes(x, y)) + geom_line() + my_meta_theme()
+p3 <- ggplot(data3, aes(x, y)) + geom_col() + my_meta_theme()
+
+# Consistent appearance across all figures!
+```
+
+**Avoid chart junk**:
+
+```r
+# ✅ Good: Minimal, focused
+ggplot(data, aes(x = treatment, y = response)) +
+  geom_boxplot() +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),  # Remove vertical grid
+    panel.grid.minor = element_blank(),    # Remove minor grid
+    legend.position = "none"               # Remove if obvious from axis
+  )
+
+# ❌ Bad: Too much visual noise
+ggplot(data, aes(x = treatment, y = response)) +
+  geom_boxplot() +
+  theme_gray() +  # Gray background
+  theme(
+    panel.border = element_rect(fill = NA, size = 2),  # Heavy border
+    panel.grid = element_line(size = 1)  # Heavy gridlines
+  )
+```
+
+### Complete Example: Meta-Analysis Plot with Best Practices
+
+```r
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(hrbrthemes)
+library(ggsci)
+
+# 1. Prepare tidy data
+forest_data <- extraction_data %>%
+  select(study_id, rr, ci_lower, ci_upper, weight) %>%
+  arrange(desc(weight))  # Order by weight
+
+# 2. Define custom theme
+meta_theme <- function() {
+  theme_ipsum_rc(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      legend.position = "bottom",
+      panel.grid.minor = element_blank(),
+      axis.line = element_line(size = 0.5)
+    )
+}
+
+# 3. Build plot incrementally
+p <- ggplot(forest_data, aes(x = rr, y = reorder(study_id, weight)))
+
+# Add reference line
+p <- p + geom_vline(xintercept = 1, linetype = "dashed", color = "gray50")
+
+# Add points and error bars
+p <- p + geom_point(aes(size = weight), color = pal_lancet()(1))
+p <- p + geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2)
+
+# Add scales with explicit settings
+p <- p + scale_x_continuous(
+  limits = c(0.5, 2.0),
+  breaks = seq(0.5, 2.0, by = 0.25),
+  trans = "log10"
+)
+
+p <- p + scale_size_continuous(
+  range = c(3, 8),
+  guide = "none"  # Don't show size legend (redundant)
+)
+
+# Add comprehensive labels
+p <- p + labs(
+  title = "Forest Plot: Pathologic Complete Response",
+  subtitle = "Risk ratio with 95% CI (5 RCTs, N=2,402 patients)",
+  x = "Risk Ratio (log scale)",
+  y = NULL,
+  caption = "Larger points = greater study weight"
+)
+
+# Apply custom theme
+p <- p + meta_theme()
+
+# 4. Export at publication quality
+ggsave("figures/forest_plot.png",
+       plot = p,
+       width = 10,
+       height = 6,
+       dpi = 300,
+       bg = "white")
+```
+
+### Common Mistakes to Avoid
+
+| ❌ Don't Do This | ✅ Do This Instead | Why |
+|------------------|-------------------|-----|
+| Use default colors | Use viridis/ggsci palettes | Colorblind accessibility |
+| Omit axis labels | Always use `labs()` | Clarity for readers |
+| Use `geom_bar(stat="identity")` | Use `geom_col()` | More concise |
+| Wide data format | Tidy (long) format | Easier to map aesthetics |
+| Repeat aesthetics in each layer | Define globally in `ggplot()` | DRY principle |
+| Default theme with gray background | `theme_minimal()` or custom | Professional appearance |
+| Include unnecessary gridlines | Remove with `theme()` | Reduce visual clutter |
+| Hard-code values | Use scales with explicit breaks | Precision and control |
+
+### Quick Reference Card
+
+```r
+# === DATA PREPARATION ===
+# Tidy format (long)
+data %>% pivot_longer(cols, names_to, values_to)
+
+# === PLOT STRUCTURE ===
+ggplot(data, aes(x, y, color = group)) +  # Global aesthetics
+  geom_point() +                          # Geom layer
+  scale_color_viridis_d() +               # Color scale
+  labs(title, x, y) +                     # Labels
+  theme_minimal() +                       # Base theme
+  theme(legend.position = "bottom")       # Theme tweaks
+
+# === EXPORT ===
+ggsave("file.png", width = 10, height = 6, dpi = 300)
+```
+
+---
+
 ## Figure Generation Workflow
 
 ### 1. Forest Plots (Primary Outcome)

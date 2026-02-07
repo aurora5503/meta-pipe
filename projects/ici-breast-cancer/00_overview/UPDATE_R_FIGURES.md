@@ -207,6 +207,208 @@ ggsave("figure1.png", width=10, height=14, dpi=300)
 
 ---
 
+## 🎨 ggplot2 最佳實踐
+
+### 為什麼重要？
+
+在 meta-analysis 專案中，ggplot2 是主要的視覺化工具。遵循最佳實踐可以：
+
+✅ **提高程式碼可讀性** - 團隊成員更容易理解和維護
+✅ **確保可重現性** - 明確的參數設定避免依賴預設值
+✅ **改善視覺效果** - 專業的外觀提升可信度
+✅ **支援無障礙** - 色盲友善的色彩確保所有讀者都能理解
+
+### 核心原則
+
+#### 1. 使用 Tidy Data (長格式)
+
+```r
+# ❌ 寬格式 (難以繪圖)
+data_wide <- data.frame(
+  study = c("Trial A", "Trial B"),
+  ici_events = c(50, 60),
+  control_events = c(40, 45)
+)
+
+# ✅ 長格式 (易於 ggplot2)
+library(tidyr)
+data_long <- data_wide %>%
+  pivot_longer(
+    cols = ends_with("_events"),
+    names_to = "treatment",
+    values_to = "events"
+  )
+
+# 現在可以輕鬆繪圖
+ggplot(data_long, aes(x = study, y = events, fill = treatment)) +
+  geom_col(position = "dodge")
+```
+
+#### 2. 全域 vs 局部美學映射
+
+```r
+# ✅ 好：全域美學 (避免重複)
+ggplot(data, aes(x = time, y = response, color = treatment)) +
+  geom_point() +
+  geom_line()
+
+# ❌ 壞：重複美學映射
+ggplot(data) +
+  geom_point(aes(x = time, y = response, color = treatment)) +
+  geom_line(aes(x = time, y = response, color = treatment))
+```
+
+#### 3. 選擇正確的 geom
+
+```r
+# ✅ 已彙總資料用 geom_col()
+ggplot(summary_data, aes(x = group, y = mean)) +
+  geom_col()
+
+# ❌ 不要用 geom_bar(stat = "identity")
+ggplot(summary_data, aes(x = group, y = mean)) +
+  geom_bar(stat = "identity")
+
+# ✅ 處理重疊點用 geom_jitter()
+ggplot(data, aes(x = treatment, y = response)) +
+  geom_jitter(width = 0.2, alpha = 0.5)
+```
+
+#### 4. 永遠明確標示
+
+```r
+# ✅ 好：完整的標籤
+ggplot(data, aes(x = time, y = survival, color = treatment)) +
+  geom_line() +
+  labs(
+    title = "Overall Survival by Treatment",
+    subtitle = "Kaplan-Meier estimates (N=1,174 patients)",
+    x = "Time since randomization (months)",
+    y = "Survival probability",
+    color = "Treatment arm"
+  )
+```
+
+#### 5. 使用色盲友善色彩
+
+```r
+# ✅ 連續變數用 viridis
+ggplot(data, aes(x, y, color = p_value)) +
+  geom_point() +
+  scale_color_viridis_c(option = "plasma")
+
+# ✅ 分類變數用 ColorBrewer 或 ggsci
+library(ggsci)
+ggplot(data, aes(x, y, fill = treatment)) +
+  geom_boxplot() +
+  scale_fill_lancet()  # Lancet 期刊色彩
+```
+
+#### 6. 建立可重用的主題
+
+```r
+# ✅ 定義一次，到處使用
+my_meta_theme <- function() {
+  theme_minimal(base_size = 14) +
+    theme(
+      plot.title = element_text(face = "bold", size = 16),
+      legend.position = "bottom",
+      panel.grid.minor = element_blank()
+    )
+}
+
+# 套用到所有圖表
+p1 <- ggplot(data1, aes(x, y)) + geom_point() + my_meta_theme()
+p2 <- ggplot(data2, aes(x, y)) + geom_line() + my_meta_theme()
+```
+
+### 完整範例：遵循最佳實踐的 Meta-Analysis 圖表
+
+```r
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(hrbrthemes)
+library(ggsci)
+
+# 1. 準備 tidy data
+forest_data <- extraction_data %>%
+  select(study_id, rr, ci_lower, ci_upper, weight) %>%
+  arrange(desc(weight))
+
+# 2. 定義自訂主題
+meta_theme <- function() {
+  theme_ipsum_rc(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      legend.position = "bottom",
+      panel.grid.minor = element_blank()
+    )
+}
+
+# 3. 漸進式建構圖表
+p <- ggplot(forest_data, aes(x = rr, y = reorder(study_id, weight)))
+
+# 加入參考線
+p <- p + geom_vline(xintercept = 1, linetype = "dashed", color = "gray50")
+
+# 加入點和誤差線
+p <- p + geom_point(aes(size = weight), color = pal_lancet()(1))
+p <- p + geom_errorbarh(aes(xmin = ci_lower, xmax = ci_upper), height = 0.2)
+
+# 明確設定刻度
+p <- p + scale_x_continuous(
+  limits = c(0.5, 2.0),
+  breaks = seq(0.5, 2.0, by = 0.25),
+  trans = "log10"
+)
+
+# 完整標籤
+p <- p + labs(
+  title = "Forest Plot: Pathologic Complete Response",
+  subtitle = "Risk ratio with 95% CI (5 RCTs, N=2,402 patients)",
+  x = "Risk Ratio (log scale)",
+  y = NULL
+)
+
+# 套用主題
+p <- p + meta_theme()
+
+# 4. 匯出
+ggsave("figures/forest_plot.png", width = 10, height = 6, dpi = 300)
+```
+
+### 常見錯誤與修正
+
+| ❌ 不要這樣做 | ✅ 應該這樣做 | 原因 |
+|--------------|------------|------|
+| 使用預設色彩 | viridis/ggsci 色彩 | 色盲友善 |
+| 省略軸標籤 | 使用 `labs()` | 清晰度 |
+| 寬格式資料 | Tidy 長格式 | 易於映射 |
+| 重複美學定義 | 全域定義在 `ggplot()` | DRY 原則 |
+| 預設灰色主題 | `theme_minimal()` | 專業外觀 |
+| 不必要的網格線 | 用 `theme()` 移除 | 減少視覺雜訊 |
+
+### 快速參考
+
+```r
+# === 資料準備 ===
+data %>% pivot_longer(cols, names_to, values_to)
+
+# === 圖表結構 ===
+ggplot(data, aes(x, y, color = group)) +  # 全域美學
+  geom_point() +                          # 幾何層
+  scale_color_viridis_d() +               # 色彩刻度
+  labs(title, x, y) +                     # 標籤
+  theme_minimal() +                       # 基礎主題
+  theme(legend.position = "bottom")       # 微調
+
+# === 匯出 ===
+ggsave("file.png", width = 10, height = 6, dpi = 300)
+```
+
+---
+
 ## 📊 圖表類型範例
 
 ### 1. 森林圖 (Forest Plots)
