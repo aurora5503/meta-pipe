@@ -5,6 +5,7 @@
 **Stage**: 06 (Analysis)
 
 **Packages**:
+
 ```r
 library(meta)      # Simple forest plots
 library(metafor)   # Advanced forest plots
@@ -244,6 +245,7 @@ ggsave("06_analysis/figures/figure1_custom.png",
 **Cause**: Missing or NA values in data
 
 **Solution**: Check for missing data
+
 ```r
 # Check for missing values
 sum(is.na(data$events_ici))
@@ -258,6 +260,7 @@ data_clean <- data %>%
 ### Problem: Forest plot text too small
 
 **Solution**: Increase plot dimensions
+
 ```r
 png("forest.png", width=12, height=10, units="in", res=300)
 forest(res)
@@ -267,6 +270,7 @@ dev.off()
 ### Problem: Studies in wrong order
 
 **Solution**: Order by effect size or weight
+
 ```r
 # Order by effect size (ascending)
 forest(res, sortvar = TE)
@@ -280,6 +284,7 @@ forest(res, sortvar = -w.random)
 ## Export Formats
 
 ### PNG (Recommended)
+
 ```r
 png("figure.png", width=10, height=8, units="in", res=300)
 forest(res)
@@ -287,6 +292,7 @@ dev.off()
 ```
 
 ### PDF (Vector graphics)
+
 ```r
 pdf("figure.pdf", width=10, height=8)
 forest(res)
@@ -294,6 +300,7 @@ dev.off()
 ```
 
 ### TIFF (Some journals require)
+
 ```r
 tiff("figure.tif", width=10, height=8, units="in", res=300, compression="lzw")
 forest(res)

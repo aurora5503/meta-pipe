@@ -147,6 +147,7 @@ install.packages("meta")
 ### Problem: "non-zero exit status"
 
 **Solution**: Install system dependencies first (macOS)
+
 ```bash
 # In Terminal, not R
 brew install cairo
@@ -155,6 +156,7 @@ brew install fribidi
 ```
 
 **Solution**: Install system dependencies (Ubuntu/Debian)
+
 ```bash
 sudo apt-get install libcairo2-dev
 sudo apt-get install libharfbuzz-dev

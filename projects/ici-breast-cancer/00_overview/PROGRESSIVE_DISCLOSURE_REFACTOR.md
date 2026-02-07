@@ -61,12 +61,14 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 **Time**: 15-30 minutes
 
 ## Quick Start
+
 [Copy-paste 範例 - 80% 解決方案]
 ```
 
 ### 2. 時間界定（Time-Bounded）
 
 每個指南明確標示所需時間：
+
 - 快速任務：10-15 分鐘（套件設定）
 - 常見任務：15-30 分鐘（森林圖）
 - 複雜任務：30-60 分鐘（Table 1）
@@ -74,6 +76,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ### 3. 複製貼上就緒（Copy-Paste Ready）
 
 每個指南開頭都有 **Quick Start** 區塊：
+
 ```r
 # 3-5 行程式碼
 # 立即可用
@@ -83,6 +86,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ### 4. 情境驅動（Scenario-Driven）
 
 不是羅列所有參數，而是展示 3-5 個真實情境：
+
 - Scenario 1: RCT meta-analysis (binary outcome)
 - Scenario 2: Survival data (HR)
 - Scenario 3: Custom ggplot2 forest plot
@@ -90,8 +94,10 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ### 5. 交叉參考（Cross-Referenced）
 
 每個指南結尾：
+
 ```markdown
 ## See Also
+
 - [02-funnel-plots.md] - Check publication bias
 - [04-multi-panel.md] - Combine multiple plots
 ```
@@ -102,7 +108,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 
 每個指南遵循相同結構：
 
-```markdown
+````markdown
 # [任務名稱]
 
 **When to use**: [具體情境]
@@ -119,6 +125,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 # 複製貼上即可用
 # 涵蓋 80% 使用情境
 ```
+````
 
 **Done!** [成果描述]
 
@@ -141,6 +148,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ```
 
 ### Scenario 2: [真實案例 2]
+
 ### Scenario 3: [真實案例 3]
 
 ---
@@ -154,9 +162,11 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ## Troubleshooting
 
 ### Problem: [常見錯誤 1]
+
 **Solution**: [解決方法]
 
 ### Problem: [常見錯誤 2]
+
 **Solution**: [解決方法]
 
 ---
@@ -172,6 +182,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 
 - [相關指南 1]
 - [相關指南 2]
+
 ```
 
 ---
@@ -280,6 +291,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 ### 單一巨型文件的問題
 
 ```
+
 編輯 "ggplot2 best practices" 區塊
 ↓
 可能影響 "gtsummary" 區塊（共享範例）
@@ -287,11 +299,13 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 需要檢查整個 780 行檔案
 ↓
 高風險，不敢大改
+
 ```
 
 ### 模組化指南的優勢
 
 ```
+
 編輯 "01-forest-plots.md"
 ↓
 完全獨立，不影響其他指南
@@ -299,6 +313,7 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 只需測試這一個指南
 ↓
 低風險，可大膽改進
+
 ```
 
 ### 擴展性
@@ -402,3 +417,4 @@ docs/R_FIGURE_GUIDE.md (275 lines)  ← 導航中心
 
 **相關 Commit**:
 - 2c2c244 - Refactor R documentation with Progressive Disclosure pattern
+```

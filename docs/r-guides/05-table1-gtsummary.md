@@ -5,6 +5,7 @@
 **Stage**: 07 (Manuscript)
 
 **Packages**:
+
 ```r
 library(gtsummary)   # Summary tables
 library(dplyr)       # Data manipulation
@@ -317,6 +318,7 @@ print(table1)
 **Cause**: Trying to use add_p() on wrong object type
 
 **Solution**: Make sure you call tbl_summary() first
+
 ```r
 # ❌ Wrong
 data %>% add_p()
@@ -328,6 +330,7 @@ data %>% tbl_summary() %>% add_p()
 ### Problem: Table shows raw variable names
 
 **Solution**: Add labels
+
 ```r
 tbl_summary(
   label = list(
@@ -340,6 +343,7 @@ tbl_summary(
 ### Problem: P-values fail with "too few observations"
 
 **Solution**: Use exact tests
+
 ```r
 add_p(
   test = list(all_categorical() ~ "fisher.test")
@@ -349,6 +353,7 @@ add_p(
 ### Problem: Missing data shown as separate row
 
 **Solution**: Set missing option
+
 ```r
 tbl_summary(missing = "no")  # Don't show missing row
 # OR
