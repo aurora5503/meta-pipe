@@ -108,6 +108,188 @@ install.packages(c(
    - High-level forest plot interface
    - [Documentation](https://cran.r-project.org/web/packages/forestplot/)
 
+### Professional Themes & Color Palettes
+
+**Why use professional themes?**
+- **Consistency**: Journal-quality aesthetics across all figures
+- **Accessibility**: Colorblind-friendly palettes (viridis, scico)
+- **Impact**: Professional appearance increases credibility
+- **Time savings**: Pre-designed themes eliminate trial-and-error
+
+#### Recommended Theme Packages
+
+1. **ggthemr** — Easy Theme Switching
+   - [GitHub](https://github.com/Mikata-Project/ggthemr)
+   - One-line theme application
+   - Themes: `flat`, `fresh`, `pale`, `earth`, `grape`
+   - **Use for**: Clean, modern figures with consistent color schemes
+
+2. **hrbrthemes** — Typography-Focused
+   - [CRAN](https://cran.r-project.org/web/packages/hrbrthemes/)
+   - Professional typography with Roboto Condensed fonts
+   - Minimal distractions, focus on data
+   - **Use for**: High-impact journal submissions (Nature, Science)
+
+3. **tvthemes** — Stylized Themes
+   - [GitHub](https://github.com/Ryo-N7/tvthemes)
+   - TV show inspired (Avatar, Brooklyn 99, etc.)
+   - Fun for presentations, not recommended for publications
+   - **Use for**: Conference talks, lab meetings
+
+4. **ggthemes** — Professional Standards
+   - [CRAN](https://cran.r-project.org/web/packages/ggthemes/)
+   - Economist, WSJ, FiveThirtyEight styles
+   - `theme_tufte()` for minimalist design
+   - **Use for**: Matching target journal style (Economist theme for health policy)
+
+5. **viridis** — Colorblind-Friendly
+   - [CRAN](https://cran.r-project.org/web/packages/viridis/)
+   - Perceptually uniform color maps
+   - 5 palettes: viridis, magma, inferno, plasma, cividis
+   - **Use for**: ALL color gradients (mandatory for accessibility)
+
+6. **scico** — Scientific Color Maps
+   - [CRAN](https://cran.r-project.org/web/packages/scico/)
+   - 30+ scientific color palettes
+   - Perceptually uniform, colorblind-safe
+   - **Use for**: Heatmaps, continuous variables
+
+7. **ggsci** — Journal Color Palettes
+   - [CRAN](https://cran.r-project.org/web/packages/ggsci/)
+   - Nature, NEJM, Lancet, JAMA color schemes
+   - `scale_color_nejm()`, `scale_fill_lancet()`
+   - **Use for**: Matching target journal aesthetics
+
+---
+
+## Professional Theme Usage
+
+### Quick Start: Apply Themes to Your Plots
+
+#### Method 1: ggthemr (Simplest)
+
+```r
+library(ggplot2)
+library(ggthemr)
+
+# Set theme once, applies to ALL subsequent plots
+ggthemr("fresh")  # Options: flat, fresh, pale, earth, grape, light, chalk
+
+# All plots now use this theme automatically
+p1 <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+p2 <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) + geom_point()
+
+# Reset to default ggplot2 theme
+ggthemr_reset()
+```
+
+**Best themes for publications**:
+- `fresh` — Clean, modern (recommended for most journals)
+- `pale` — Soft colors, high contrast
+- `flat` — Minimal, professional
+
+#### Method 2: hrbrthemes (Best Typography)
+
+```r
+library(ggplot2)
+library(hrbrthemes)
+
+# Apply to individual plot
+p <- ggplot(mtcars, aes(mpg, wt)) +
+  geom_point() +
+  theme_ipsum() +              # Main theme
+  labs(title = "Highway MPG vs Weight")
+
+# Variations
+theme_ipsum_rc()  # Roboto Condensed (recommended)
+theme_ipsum_ps()  # IBM Plex Sans
+theme_ipsum_tw()  # Titillium Web
+```
+
+**Why use hrbrthemes?**
+- Professional typography out-of-the-box
+- High contrast for readability
+- Minimal grid lines (focuses attention on data)
+- Used by data journalism (FiveThirtyEight style)
+
+#### Method 3: ggsci (Journal Color Palettes)
+
+```r
+library(ggplot2)
+library(ggsci)
+
+# Match Nature journal colors
+p <- ggplot(data, aes(x, y, color = group)) +
+  geom_point() +
+  scale_color_npg() +           # Nature Publishing Group
+  theme_minimal()
+
+# Other journal palettes
+scale_color_nejm()   # New England Journal of Medicine
+scale_color_lancet() # The Lancet
+scale_color_jama()   # JAMA
+scale_color_jco()    # Journal of Clinical Oncology
+```
+
+**When to use**:
+- Submitting to specific journal → use that journal's palette
+- General medical journal → use NEJM or Lancet
+- Oncology → use JCO palette
+
+#### Method 4: viridis (Colorblind-Safe)
+
+```r
+library(ggplot2)
+library(viridis)
+
+# For continuous variables
+p <- ggplot(data, aes(x, y, color = value)) +
+  geom_point() +
+  scale_color_viridis_c(option = "plasma")  # Options: A-H
+
+# For discrete groups
+p <- ggplot(data, aes(x, y, color = group)) +
+  geom_point() +
+  scale_color_viridis_d(option = "viridis")
+
+# Options explained
+# "viridis" (A) — Default, purple to yellow
+# "magma"   (B) — Dark purple to white
+# "inferno" (C) — Black to yellow
+# "plasma"  (D) — Purple to pink to yellow (recommended)
+# "cividis" (E) — Blue to yellow (best for colorblind)
+```
+
+**Mandatory use cases**:
+- Heatmaps
+- Continuous color scales
+- Any plot where color represents data value
+- Plots that might be printed in grayscale
+
+#### Method 5: Combining Multiple Packages
+
+```r
+library(ggplot2)
+library(hrbrthemes)
+library(ggsci)
+
+# Professional plot with best practices
+p <- ggplot(data, aes(x, y, color = treatment)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "loess", se = TRUE) +
+  scale_color_lancet() +        # Lancet color palette
+  theme_ipsum_rc() +            # Professional typography
+  labs(
+    title = "Treatment Effect Over Time",
+    subtitle = "RCT data from 5 trials (N=2,402)",
+    x = "Time (months)",
+    y = "Response Rate (%)",
+    color = "Treatment"
+  )
+
+ggsave("figures/treatment_effect.png", width = 10, height = 6, dpi = 300)
+```
+
 ---
 
 ## Figure Generation Workflow
