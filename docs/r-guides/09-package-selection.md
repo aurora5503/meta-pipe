@@ -8,21 +8,54 @@
 
 ## Quick Decision Guide
 
-| Your Task                  | Use This Package              | Why                                   |
-| -------------------------- | ----------------------------- | ------------------------------------- |
-| Calculate effect sizes     | `metafor::escalc()`           | Handles 50+ effect size types         |
-| Fit meta-analysis model    | `metafor::rma()`              | Gold standard, most flexible          |
-| Simple binary outcomes     | `meta::metabin()`             | Simpler syntax, auto forest plots     |
-| Assess heterogeneity       | `metafor`                     | Full suite of stats + CIs             |
-| Publication bias           | `metafor` + `dmetar`          | Multiple methods available            |
-| Forest plots (quick)       | `meta::forest()`              | Auto-generated, publication-ready     |
-| Forest plots (custom)      | `metafor::forest()`           | Full control over layout              |
-| Meta-regression            | `metafor::rma(mods = ~)`      | Native moderator support              |
-| Multilevel models          | `metafor::rma.mv()`           | Handles dependent effect sizes        |
-| Robust variance            | `clubSandwich`                | Cluster-robust SE for multilevel      |
-| Network meta-analysis      | `netmeta` or `gemtc`          | Frequentist or Bayesian NMA           |
-| Bayesian meta-analysis     | `brms`                        | Full Bayesian inference               |
-| PRISMA flow diagram        | `PRISMA2020`                  | Standardized reporting                |
+| Your Task               | Use This Package         | Why                               |
+| ----------------------- | ------------------------ | --------------------------------- |
+| Calculate effect sizes  | `metafor::escalc()`      | Handles 50+ effect size types     |
+| Fit meta-analysis model | `metafor::rma()`         | Gold standard, most flexible      |
+| Simple binary outcomes  | `meta::metabin()`        | Simpler syntax, auto forest plots |
+| Assess heterogeneity    | `metafor`                | Full suite of stats + CIs         |
+| Publication bias        | `metafor` + `dmetar`     | Multiple methods available        |
+| Forest plots (quick)    | `meta::forest()`         | Auto-generated, publication-ready |
+| Forest plots (custom)   | `metafor::forest()`      | Full control over layout          |
+| Meta-regression         | `metafor::rma(mods = ~)` | Native moderator support          |
+| Multilevel models       | `metafor::rma.mv()`      | Handles dependent effect sizes    |
+| Robust variance         | `clubSandwich`           | Cluster-robust SE for multilevel  |
+| Network meta-analysis   | `netmeta` or `gemtc`     | Frequentist or Bayesian NMA       |
+| Bayesian meta-analysis  | `brms`                   | Full Bayesian inference           |
+| PRISMA flow diagram     | `PRISMA2020`             | Standardized reporting            |
+
+---
+
+## Recommended Package Stack
+
+**The Typical Stack** (covers ~80% of meta-analysis needs):
+
+```r
+# Core (MUST HAVE)
+install.packages("metafor")      # Backbone: effect sizes, models, heterogeneity, meta-regression
+install.packages("meta")         # Quick forest plots for simple RCTs
+
+# Essential Supplements (SHOULD HAVE)
+install.packages("dmetar")       # Convenient bias tools (p-curve, limit meta-analysis)
+install.packages("clubSandwich") # Robust variance for multilevel models
+install.packages("PublicationBias") # Sensitivity analyses for publication bias
+
+# Network Meta-Analysis (IF NEEDED)
+install.packages("netmeta")      # Frequentist NMA
+install.packages("gemtc")        # Bayesian NMA
+```
+
+**Why this stack?**
+
+| Package            | Role                                             | Coverage |
+| ------------------ | ------------------------------------------------ | -------- |
+| **metafor**        | Foundation - handles 80% of all analyses         | 80%      |
+| **meta**           | Quick visualization - publication-ready plots    | +10%     |
+| **dmetar**         | Publication bias helpers - p-curve, diagnostics  | +5%      |
+| **clubSandwich**   | Advanced models - robust variance for multilevel | +3%      |
+| **PublicationBias** | Sensitivity - Mathur & VanderWeele methods      | +2%      |
+
+**Total coverage**: ~95-98% of typical meta-analysis workflows
 
 ---
 
@@ -195,14 +228,15 @@ forest(res,
 
 #### Package Comparison
 
-| Package      | Strengths                                                                              | Weaknesses                                   |
-| ------------ | -------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **meta**     | Auto forest plots with `forest()`, simple syntax, publication-ready defaults          | Less customization, harder to modify layouts |
-| **metafor**  | Full control over layout, colors, annotations; supports complex models                 | More verbose, requires manual customization  |
-| **forestplot** | Advanced grid-based layouts, multiple columns, confidence bands                      | Steeper learning curve, not meta-specific    |
-| **orchaRd**  | Specialized for ecology/evolution meta-analysis, beautiful default aesthetics         | Narrow domain focus                          |
+| Package        | Strengths                                                                     | Weaknesses                                   |
+| -------------- | ----------------------------------------------------------------------------- | -------------------------------------------- |
+| **meta**       | Auto forest plots with `forest()`, simple syntax, publication-ready defaults  | Less customization, harder to modify layouts |
+| **metafor**    | Full control over layout, colors, annotations; supports complex models        | More verbose, requires manual customization  |
+| **forestplot** | Advanced grid-based layouts, multiple columns, confidence bands               | Steeper learning curve, not meta-specific    |
+| **orchaRd**    | Specialized for ecology/evolution meta-analysis, beautiful default aesthetics | Narrow domain focus                          |
 
 **Recommendation**:
+
 - **For most projects**: Use `meta::forest()` for speed
 - **For publication customization**: Use `metafor::forest()` for control
 - **For multi-panel layouts**: Use `forestplot` package
@@ -230,12 +264,12 @@ anova(res, res_mr)  # Test moderators jointly
 
 #### Package Comparison
 
-| Package          | Strengths                                                                         | Weaknesses                               |
-| ---------------- | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| **metafor**      | Native meta-regression (`mods = ~`), robust SE, model comparison, residual plots | Frequentist only                         |
-| **meta**         | Simple `metareg()` function for basic regression                                  | Limited to simple models, no interaction |
-| **brms**         | Bayesian meta-regression with priors, non-linear models                           | Slower, requires MCMC knowledge          |
-| **MCMCglmm**     | Bayesian multilevel meta-regression                                               | Complex syntax, steep learning curve     |
+| Package      | Strengths                                                                        | Weaknesses                               |
+| ------------ | -------------------------------------------------------------------------------- | ---------------------------------------- |
+| **metafor**  | Native meta-regression (`mods = ~`), robust SE, model comparison, residual plots | Frequentist only                         |
+| **meta**     | Simple `metareg()` function for basic regression                                 | Limited to simple models, no interaction |
+| **brms**     | Bayesian meta-regression with priors, non-linear models                          | Slower, requires MCMC knowledge          |
+| **MCMCglmm** | Bayesian multilevel meta-regression                                              | Complex syntax, steep learning curve     |
 
 **Recommendation**: Use `metafor` unless you need Bayesian inference (then `brms`)
 
@@ -264,11 +298,11 @@ coef_test(res_ml, vcov = "CR2")  # Cluster-robust SE
 
 #### Package Comparison
 
-| Package                     | Strengths                                                                                 | Weaknesses                           |
-| --------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------ |
-| **metafor** + **clubSandwich** | `rma.mv()` for multilevel models, `clubSandwich::coef_test()` for robust SE, well-tested | Frequentist only                     |
-| **robumeta**                | Simple RVE (robust variance estimation) interface, good for hierarchical data             | Less flexible than metafor           |
-| **brms**                    | Bayesian multilevel models, non-linear effects, priors                                    | Slower, requires MCMC expertise      |
+| Package                        | Strengths                                                                                | Weaknesses                      |
+| ------------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------- |
+| **metafor** + **clubSandwich** | `rma.mv()` for multilevel models, `clubSandwich::coef_test()` for robust SE, well-tested | Frequentist only                |
+| **robumeta**                   | Simple RVE (robust variance estimation) interface, good for hierarchical data            | Less flexible than metafor      |
+| **brms**                       | Bayesian multilevel models, non-linear effects, priors                                   | Slower, requires MCMC expertise |
 
 **Recommendation**: Use `metafor::rma.mv()` + `clubSandwich` for most multilevel meta-analyses
 
@@ -300,14 +334,15 @@ results <- mtc.run(model)
 
 #### Package Comparison
 
-| Package      | Strengths                                                                                   | Weaknesses                              |
-| ------------ | ------------------------------------------------------------------------------------------- | --------------------------------------- |
-| **netmeta**  | Fast frequentist NMA, automatic network graphs, league tables, ranking (P-scores)           | No Bayesian inference                   |
-| **gemtc**    | Bayesian NMA with JAGS, prior flexibility, inconsistency models                             | Slower (MCMC), requires JAGS install    |
-| **multinma** | Modern Bayesian NMA with Stan, IPD + aggregate data integration                             | Newer package, fewer tutorials          |
-| **bnma**     | Bayesian NMA with contrast-based or arm-based models                                        | Less active development                 |
+| Package      | Strengths                                                                         | Weaknesses                           |
+| ------------ | --------------------------------------------------------------------------------- | ------------------------------------ |
+| **netmeta**  | Fast frequentist NMA, automatic network graphs, league tables, ranking (P-scores) | No Bayesian inference                |
+| **gemtc**    | Bayesian NMA with JAGS, prior flexibility, inconsistency models                   | Slower (MCMC), requires JAGS install |
+| **multinma** | Modern Bayesian NMA with Stan, IPD + aggregate data integration                   | Newer package, fewer tutorials       |
+| **bnma**     | Bayesian NMA with contrast-based or arm-based models                              | Less active development              |
 
 **Recommendation**:
+
 - **For frequentist NMA**: Use `netmeta`
 - **For Bayesian NMA**: Use `gemtc` (mature) or `multinma` (modern)
 
@@ -321,17 +356,17 @@ results <- mtc.run(model)
 
 #### Tool Comparison
 
-| Tool                  | What it does                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| **PRISMA2020**        | Generate PRISMA 2020 flow diagrams from R objects (replaces PRISMAstatement)                   |
-| **Rmarkdown/Quarto**  | Reproducible manuscripts with embedded R code, citations, cross-references                     |
-| **apaTables**         | APA-formatted regression tables (not meta-specific but useful)                                 |
-| **papaja**            | APA manuscripts with integrated R analysis (psychology focus)                                  |
-| **metafor** reporting | Built-in functions: `confint()`, `forest()`, `funnel()`, `regtest()` with export options      |
+| Tool                  | What it does                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| **PRISMA2020**        | Generate PRISMA 2020 flow diagrams from R objects (replaces PRISMAstatement)             |
+| **Rmarkdown/Quarto**  | Reproducible manuscripts with embedded R code, citations, cross-references               |
+| **apaTables**         | APA-formatted regression tables (not meta-specific but useful)                           |
+| **papaja**            | APA manuscripts with integrated R analysis (psychology focus)                            |
+| **metafor** reporting | Built-in functions: `confint()`, `forest()`, `funnel()`, `regtest()` with export options |
 
 **Example Workflow**:
 
-```r
+````r
 # PRISMA flow diagram
 library(PRISMA2020)
 prisma_flow <- PRISMA_flowdiagram(
@@ -348,9 +383,10 @@ prisma_flow <- PRISMA_flowdiagram(
 # res <- rma(yi, vi, data = es)
 # forest(res)
 # ```
-```
+````
 
 **Recommendation**:
+
 - Use **PRISMA2020** for flow diagrams
 - Use **Quarto** for reproducible manuscripts
 - Use **metafor** built-in reporting functions for tables/figures
@@ -359,21 +395,35 @@ prisma_flow <- PRISMA_flowdiagram(
 
 ## Installation
 
+### The Recommended Stack (Start Here)
+
+**For 95% of meta-analyses, install these 5 packages:**
+
 ```r
-# Core packages (install first)
-install.packages(c("metafor", "meta"))
+# The Typical Stack (covers ~80% of needs)
+install.packages(c(
+  "metafor",        # Core: effect sizes, models, heterogeneity, meta-regression
+  "meta",           # Quick forest plots for simple RCTs
+  "dmetar",         # Publication bias helpers (p-curve, etc.)
+  "clubSandwich",   # Robust variance for multilevel models
+  "PublicationBias" # Sensitivity analyses
+))
+```
 
-# Additional packages (install as needed)
-install.packages(c("dmetar", "weightr"))
+**Why this combination?**
+- `metafor` handles 80% of analysis tasks
+- `meta` adds quick visualization (+10%)
+- `dmetar` + `PublicationBias` cover publication bias (+5%)
+- `clubSandwich` enables advanced multilevel models (+3%)
+- **Total**: ~95-98% of typical workflows
 
-# PublicationBias (from CRAN)
-install.packages("PublicationBias")
+### Optional: Advanced Packages
 
+```r
 # Advanced forest plots
 install.packages("forestplot")
 
-# Multilevel models
-install.packages("clubSandwich")  # Robust variance estimation
+# Alternative multilevel
 install.packages("robumeta")      # Alternative RVE
 
 # Network meta-analysis
@@ -646,35 +696,61 @@ trimfill(res)     # Trim-and-fill
 
 **metafor is the backbone of meta-analysis in R**
 
+It covers ~80% of what you need. Supplement with:
+- **meta** for quick forest plots
+- **dmetar** for convenient bias tools
+- **PublicationBias** for sensitivity analyses
+- **clubSandwich** for robust variance
+- **netmeta/gemtc** for network meta-analysis
+
+### The Recommended Stack
+
+**For 95% of meta-analyses:**
+
+```r
+# The Typical Stack
+metafor + meta + dmetar + clubSandwich + PublicationBias
+```
+
+**Installation (one command):**
+
+```r
+install.packages(c("metafor", "meta", "dmetar", "clubSandwich", "PublicationBias"))
+```
+
 ### Use Cases by Complexity
 
-| Complexity | Recommendation                                                                 |
-| ---------- | ------------------------------------------------------------------------------ |
-| **Simple** | `meta` (metabin, metacont) - Fast, auto forest plots, publication-ready       |
-| **Standard** | `metafor` (rma) - Flexible, multiple tau² estimators, meta-regression        |
-| **Advanced** | `metafor` (rma.mv) + `clubSandwich` - Multilevel, robust variance            |
-| **Network** | `netmeta` (frequentist) or `gemtc` (Bayesian)                                 |
-| **Bayesian** | `brms` - Full Bayesian inference with priors                                 |
+| Complexity   | Packages Needed                                                  | Coverage |
+| ------------ | ---------------------------------------------------------------- | -------- |
+| **Simple**   | `meta` (metabin, metacont) + `metafor` (effect sizes)            | 90%      |
+| **Standard** | Add `dmetar` + `PublicationBias` for publication bias            | 95%      |
+| **Advanced** | Add `clubSandwich` for multilevel models                         | 98%      |
+| **Network**  | Add `netmeta` (frequentist) or `gemtc` (Bayesian)               | 99%      |
+| **Bayesian** | Add `brms` for full Bayesian inference                           | 99.5%    |
 
 ### The 80/20 Rule
 
-**80% of meta-analyses only need**:
+**Core Stack (80% of analyses)**:
 - `metafor` - Effect sizes, models, heterogeneity, meta-regression
 - `meta` - Quick forest plots for simple RCTs
-- `ggplot2` - Custom visualization
 
-**20% of meta-analyses additionally need**:
-- `clubSandwich` - Robust variance for multilevel models
-- `netmeta` - Network meta-analysis
-- `PRISMA2020` - Flow diagrams
+**Essential Supplements (90-95% of analyses)**:
 - `dmetar` - Helper functions and p-curve
+- `clubSandwich` - Robust variance for multilevel models
+- `PublicationBias` - Sensitivity analyses
+
+**Advanced Extensions (95-99% of analyses)**:
+- `netmeta`/`gemtc` - Network meta-analysis
+- `PRISMA2020` - Flow diagrams
+- `brms` - Bayesian inference
 
 ---
 
 **Key Takeaway**:
 
-- Use **meta** for simple, straightforward meta-analysis (easier syntax)
-- Use **metafor** for complex models and maximum flexibility
-- Use **clubSandwich** with metafor for multilevel models
-- Use **netmeta** for network meta-analysis
-- Use **PRISMA2020** + **Quarto** for reproducible reporting
+**Start with the recommended stack:**
+```r
+metafor + meta + dmetar + clubSandwich + PublicationBias
+```
+
+This covers ~95% of meta-analysis workflows. Add specialized packages (netmeta, brms, PRISMA2020) only when needed for specific analyses.
