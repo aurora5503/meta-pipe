@@ -11,22 +11,26 @@ Utility scripts for managing the meta-analysis pipeline.
 **Purpose**: Clean up root directory markdown files after project consolidation
 
 **Usage**:
+
 ```bash
 cd /Users/htlin/meta-pipe
 ./tooling/scripts/cleanup_root_markdown.sh
 ```
 
 **What it does**:
+
 1. Identifies duplicate files (already in `projects/ici-breast-cancer/`)
 2. Archives non-essential draft files to `_archive/`
 3. Keeps only essential files in root directory
 
 **Interactive options**:
+
 - Option 1: Remove duplicates (recommended)
 - Option 2: Move duplicates to `_archive/`
 - Option 3: Keep duplicates (no changes)
 
 **Essential files kept in root**:
+
 - `AGENTS.md` - Agent instructions
 - `CLAUDE.md` - Symlink to AGENTS.md
 - `README.md` - Project overview
@@ -53,12 +57,14 @@ See `tooling/python/` for Python utility scripts:
 ### When to Use Cleanup Script
 
 ✅ **Use when**:
+
 - Finishing a project (99%+ complete)
 - Root directory has many temporary markdown files
 - Preparing to start a new project
 - Want to keep root directory clean
 
 ❌ **Don't use when**:
+
 - Project is still in progress (< 95% complete)
 - Files haven't been consolidated yet
 - Unsure if files are duplicates
@@ -82,6 +88,7 @@ See `tooling/python/` for Python utility scripts:
    - Python: `tooling/python/`
 
 2. Make executable (if shell script):
+
    ```bash
    chmod +x tooling/scripts/your_script.sh
    ```

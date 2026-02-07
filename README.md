@@ -59,6 +59,7 @@ uv run tooling/python/consolidate_project_outputs.py --project-name your-project
 ```
 
 Creates `projects/your-project/` with:
+
 - 10 organized directories (00_overview → 09_scripts)
 - INDEX.md with complete file listings
 - README.md with navigation guide
