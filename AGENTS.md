@@ -9,6 +9,29 @@ AI-assisted meta-analysis pipeline. This file is auto-loaded by Claude Code.
 **New project?** → Say "brainstorm" or "help me find a topic"
 **Have TOPIC.txt?** → Say "start" or "continue"
 **At Stage 06?** → Say "complete manuscript" or see [Manuscript Assembly](docs/MANUSCRIPT_ASSEMBLY.md)
+**Want to see an example?** → Check `projects/ici-breast-cancer/` (99% complete meta-analysis)
+
+---
+
+## Example: Completed Meta-Analysis
+
+**Location**: `projects/ici-breast-cancer/`
+
+A **real, 99% complete meta-analysis** on immune checkpoint inhibitors in triple-negative breast cancer (TNBC):
+
+**Key Metrics**:
+- 5 RCTs, N=2,402 patients
+- Primary outcome: RR 1.26 (95% CI 1.16-1.37), p=0.0015, ⊕⊕⊕⊕ HIGH quality
+- Manuscript: 4,921 words (compliant with Lancet Oncology, JAMA Oncology)
+- Time invested: ~14 hours (vs 100+ hours manual)
+
+**Quick Tour**:
+1. `projects/ici-breast-cancer/README.md` - Complete navigation guide
+2. `projects/ici-breast-cancer/00_overview/FINAL_PROJECT_SUMMARY.md` - All findings (415 lines)
+3. `projects/ici-breast-cancer/07_manuscript/` - Full manuscript (5 sections + 7 tables)
+4. `projects/ici-breast-cancer/06_analysis/` - All R scripts + results
+
+**Use this as a template** when starting your own meta-analysis.
 
 ---
 
@@ -423,6 +446,7 @@ uv run validate_extraction.py \
 **⚠️ IMPORTANT**: Perform after extraction is complete (`extraction.csv` ready)
 
 **Choose assessment tool based on study design:**
+
 - **RoB 2** for randomized controlled trials (RCTs)
 - **ROBINS-I** for non-randomized studies (cohort, case-control)
 
@@ -445,6 +469,7 @@ uv run ../../ma-peer-review/scripts/init_robins_i_assessment.py \
 **Assessment domains:**
 
 **RoB 2** (5 domains):
+
 1. Randomization process
 2. Deviations from intended interventions
 3. Missing outcome data
@@ -452,6 +477,7 @@ uv run ../../ma-peer-review/scripts/init_robins_i_assessment.py \
 5. Selection of the reported result
 
 **ROBINS-I** (7 domains):
+
 1. Confounding
 2. Selection of participants
 3. Classification of interventions
@@ -677,5 +703,11 @@ uv run ../../ma-end-to-end/scripts/checkpoint.py --restore --name pre-analysis -
 - [Skill Generalization](docs/SKILL_GENERALIZATION.md) - Extract workflows at 95%+ completion
 - [API Setup](docs/API_SETUP.md) - Configure API keys for Scopus/Embase
 - [Getting Started](GETTING_STARTED.md) - Detailed step-by-step guide
+
+**Example Project**:
+
+- [ICI in TNBC Meta-Analysis](projects/ici-breast-cancer/) - Complete 99% finished project (5 RCTs, N=2,402)
+  - See `projects/ici-breast-cancer/README.md` for navigation
+  - Use as template for your own meta-analysis
 
 **Templates**: Each `ma-*/references/` folder contains protocol and analysis templates

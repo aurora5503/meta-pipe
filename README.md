@@ -48,6 +48,26 @@ Claude will guide you through an interactive session to develop your research qu
 | 08_reviews    | grade_summary.md          |
 | 09_qa         | final_qa_report.md        |
 
+---
+
+## Example: Completed Project
+
+**See a real meta-analysis** → `projects/ici-breast-cancer/`
+
+This is a **99% complete meta-analysis** on immune checkpoint inhibitors in triple-negative breast cancer:
+
+- **5 RCTs, N=2,402 patients**
+- **Primary outcome**: RR 1.26 (95% CI 1.16-1.37), p=0.0015, ⊕⊕⊕⊕ HIGH quality
+- **Manuscript**: 4,921 words (Lancet Oncology compliant)
+- **Time invested**: ~14 hours (vs 100+ hours manual)
+
+**Quick tour**:
+1. `projects/ici-breast-cancer/README.md` - Project overview
+2. `projects/ici-breast-cancer/00_overview/FINAL_PROJECT_SUMMARY.md` - Key findings
+3. `projects/ici-breast-cancer/07_manuscript/` - Complete manuscript (5 sections)
+
+**Use as template** for your own meta-analysis workflow.
+
 ## Utility Scripts
 
 ### Project Consolidation
