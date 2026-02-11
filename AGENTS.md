@@ -254,6 +254,20 @@ uv run ../../ma-search-bibliography/scripts/zotero_fetch.py \
 
 uv run ../../ma-search-bibliography/scripts/zotero_sync.py \
   --in-bib ../../projects/<project-name>/02_search/round-01/dedupe.bib --collection-key "<key>"
+
+# Database record counts summary
+uv run ../../ma-search-bibliography/scripts/db_counts.py \
+  --root ../../projects/<project-name>/../projects/<project-name> --round round-01
+
+# MeSH term expansion (alternative to expand_terms.py)
+uv run ../../ma-search-bibliography/scripts/mesh_expand.py \
+  --pico ../../projects/<project-name>/01_protocol/pico.yaml \
+  --out ../../projects/<project-name>/02_search/round-01/mesh_terms.yaml
+
+# Search audit trail (reproducibility)
+uv run ../../ma-search-bibliography/scripts/search_audit.py \
+  --root ../../projects/<project-name>/../projects/<project-name> --round round-01 \
+  --out ../../projects/<project-name>/02_search/round-01/search_audit.json
 ```
 
 **📖 See**: [Zotero Setup Guide](ma-search-bibliography/references/zotero-setup.md) for detailed Zotero configuration
@@ -340,6 +354,11 @@ uv run ../../ma-fulltext-management/scripts/download_oa_pdfs.py \
   --out-log ../../projects/<project-name>/04_fulltext/round-01/pdf_download.log \
   --sleep 1 \
   --max-retries 3
+
+# Render PDF page previews for visual QA (optional)
+uv run ../../ma-fulltext-management/scripts/render_pdf_previews.py \
+  --pdf-dir ../../projects/<project-name>/04_fulltext/round-01/pdfs \
+  --out-dir ../../projects/<project-name>/04_fulltext/round-01/previews
 ```
 
 **Expected results**:
@@ -468,6 +487,21 @@ uv run validate_extraction.py \
 - 65-70% time savings vs manual extraction
 - Some missing fields will need manual review
 - See `validation_report.md` for data quality issues
+
+**Additional extraction utilities:**
+
+```bash
+# Initialize SQLite extraction database
+uv run ../../ma-data-extraction/scripts/init_extraction_db.py \
+  --data-dict ../../projects/<project-name>/05_extraction/data-dictionary.md \
+  --out-db ../../projects/<project-name>/05_extraction/extraction.sqlite
+
+# Validate extraction sources against screening decisions
+uv run ../../ma-data-extraction/scripts/validate_sources.py \
+  --extraction ../../projects/<project-name>/05_extraction/round-01/extraction.csv \
+  --decisions ../../projects/<project-name>/03_screening/round-01/decisions.csv \
+  --out-md ../../projects/<project-name>/05_extraction/round-01/source_validation.md
+```
 
 </details>
 
@@ -628,6 +662,11 @@ uv run ../../ma-manuscript-quarto/scripts/results_consistency_report.py \
   --out projects/<project-name>/09_qa/results_consistency_report.md \
   --strict
 
+# Insert search report into Methods section
+uv run ../../ma-manuscript-quarto/scripts/insert_search_report.py \
+  --search-report ../../projects/<project-name>/02_search/round-01/search_report.md \
+  --methods projects/<project-name>/07_manuscript/02_methods.qmd
+
 # Render
 uv run ../../ma-manuscript-quarto/scripts/render_manuscript.py \
   --root ../../projects/<project-name>/.. --index projects/<project-name>/07_manuscript/index.qmd
@@ -672,6 +711,28 @@ uv run ../../ma-publication-quality/scripts/crossref_check.py \
   --manuscript-dir ../../projects/<project-name>/07_manuscript \
   --figures-dir ../../projects/<project-name>/06_analysis/figures \
   --out ../../projects/<project-name>/09_qa/crossref_report.md
+
+# Check reporting checklist completion
+uv run ../../ma-publication-quality/scripts/check_reporting_completion.py \
+  --root ../../projects/<project-name>/.. \
+  --out projects/<project-name>/09_qa/reporting_completion.md
+
+# Check claim-to-table mapping consistency
+uv run ../../ma-publication-quality/scripts/claim_table_check.py \
+  --claims projects/<project-name>/07_manuscript/result_claims.csv \
+  --tables-dir projects/<project-name>/06_analysis/tables \
+  --out projects/<project-name>/09_qa/claim_table_check.md
+
+# Run robustness checks (GRADE, PRISMA, agreement stats)
+uv run ../../ma-end-to-end/scripts/run_robustness_checks.py \
+  --root ../../projects/<project-name>/../projects/<project-name> --round round-01 \
+  --out projects/<project-name>/09_qa/robustness_checks.md
+
+# Validate stage transitions (record ID continuity)
+uv run ../../ma-end-to-end/scripts/validate_stage_transition.py \
+  --root ../../projects/<project-name>/../projects/<project-name> \
+  --from-stage 02 --to-stage 03 \
+  --decisions-column final_decision
 
 # Hash artifacts for reproducibility audit
 uv run ../../ma-end-to-end/scripts/hash_artifacts.py \

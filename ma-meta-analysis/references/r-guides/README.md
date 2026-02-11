@@ -20,6 +20,7 @@
 | Stage 07 | Regression tables      | [06-regression-tables.md](06-regression-tables.md) |
 | Any      | Choose colors/themes   | [07-themes-colors.md](07-themes-colors.md)         |
 | Any      | ggplot2 best practices | [08-ggplot2-patterns.md](08-ggplot2-patterns.md)   |
+| Ref      | forestplot standard    | [FORESTPLOT_STANDARD.md](FORESTPLOT_STANDARD.md)   |
 
 ### By Task
 
