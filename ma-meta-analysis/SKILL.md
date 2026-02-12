@@ -25,22 +25,35 @@ Analyze extracted data using standard meta-analysis methods and produce validate
 - `06_analysis/07_sensitivity.R`
 - `06_analysis/08_bias.R`
 - `06_analysis/09_validation.R`
+- `06_analysis/07_export_tables.R`
 - `06_analysis/figures/` PNG files at 300 dpi
-- `06_analysis/tables/` CSV or HTML tables
+- `06_analysis/tables/` PNG + HTML + DOCX + CSV tables (via `gt` + `flextable`)
 - `06_analysis/validation.md`
 - `06_analysis/renv.lock`
+
+## Statistical Defaults
+
+All models must use **REML + Hartung-Knapp** (Cochrane mandate, July 2025):
+
+```r
+# meta:    metagen(..., method.tau = "REML", hakn = TRUE)
+# metafor: rma(..., method = "REML", test = "knha")
+```
+
+Run DerSimonian-Laird as sensitivity analysis for comparison, but REML + HKSJ is the primary result.
 
 ## Workflow
 
 1. Initialize `renv` in `06_analysis/` and record package versions.
 2. Copy the R templates from `assets/r/` into `06_analysis/` and adapt them to the study schema.
 3. Compute effect sizes with `metafor::escalc` for the outcome type.
-4. Fit primary models using `meta` and/or `metafor`.
+4. Fit primary models using `meta` and/or `metafor` with REML + Hartung-Knapp defaults.
 5. Assess heterogeneity (I2, Q, tau2), subgroup analyses, and meta-regression when applicable.
 6. Conduct sensitivity analyses and publication bias diagnostics.
 7. Generate forest and funnel plots at 300 dpi.
 8. Use `gtsummary` to build manuscript-ready summary tables.
-9. Summarize key results and decisions in `06_analysis/validation.md`.
+9. Export tables as PNG/HTML/DOCX via `gt` + `flextable` for manuscript sync.
+10. Summarize key results and decisions in `06_analysis/validation.md`.
 
 ## Resources
 

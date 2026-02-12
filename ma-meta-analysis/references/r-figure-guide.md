@@ -17,18 +17,19 @@
 
 ### I Need To...
 
-| Task                       | Guide                                                       | Time      |
-| -------------------------- | ----------------------------------------------------------- | --------- |
-| **Set up R packages**      | [00-setup.md](r-guides/00-setup.md)                         | 10-15 min |
-| **Choose R packages**      | [09-package-selection.md](r-guides/09-package-selection.md) | 10-15 min |
-| **Make a forest plot**     | [01-forest-plots.md](r-guides/01-forest-plots.md)           | 15-30 min |
-| **Create a funnel plot**   | [02-funnel-plots.md](r-guides/02-funnel-plots.md)           | 10-15 min |
-| **Do subgroup analysis**   | [03-subgroup-plots.md](r-guides/03-subgroup-plots.md)       | 20-30 min |
-| **Combine multiple plots** | [04-multi-panel.md](r-guides/04-multi-panel.md)             | 15-20 min |
-| **Create Table 1**         | [05-table1-gtsummary.md](r-guides/05-table1-gtsummary.md)   | 30-60 min |
-| **Make regression tables** | [06-regression-tables.md](r-guides/06-regression-tables.md) | 20-30 min |
-| **Choose colors/themes**   | [07-themes-colors.md](r-guides/07-themes-colors.md)         | 10-15 min |
-| **Learn ggplot2 basics**   | [08-ggplot2-patterns.md](r-guides/08-ggplot2-patterns.md)   | 30-45 min |
+| Task                       | Guide                                                           | Time      |
+| -------------------------- | --------------------------------------------------------------- | --------- |
+| **Set up R packages**      | [00-setup.md](r-guides/00-setup.md)                             | 10-15 min |
+| **Choose R packages**      | [09-package-selection.md](r-guides/09-package-selection.md)     | 10-15 min |
+| **Make a forest plot**     | [01-forest-plots.md](r-guides/01-forest-plots.md)               | 15-30 min |
+| **Create a funnel plot**   | [02-funnel-plots.md](r-guides/02-funnel-plots.md)               | 10-15 min |
+| **Do subgroup analysis**   | [03-subgroup-plots.md](r-guides/03-subgroup-plots.md)           | 20-30 min |
+| **Combine multiple plots** | [04-multi-panel.md](r-guides/04-multi-panel.md)                 | 15-20 min |
+| **Create Table 1**         | [05-table1-gtsummary.md](r-guides/05-table1-gtsummary.md)       | 30-60 min |
+| **Make regression tables** | [06-regression-tables.md](r-guides/06-regression-tables.md)     | 20-30 min |
+| **Choose colors/themes**   | [07-themes-colors.md](r-guides/07-themes-colors.md)             | 10-15 min |
+| **Learn ggplot2 basics**   | [08-ggplot2-patterns.md](r-guides/08-ggplot2-patterns.md)       | 30-45 min |
+| **Script architecture**    | [10-script-architecture.md](r-guides/10-script-architecture.md) | 10 min    |
 
 ---
 
@@ -56,6 +57,17 @@ install.packages(c("ggsci", "viridis"))
 ```
 
 **Full setup guide**: [r-guides/00-setup.md](r-guides/00-setup.md)
+
+### Statistical Defaults (Cochrane 2025)
+
+All models must use REML + Hartung-Knapp as default (Cochrane mandate, July 2025):
+
+```r
+# meta:    metagen(..., method.tau = "REML", hakn = TRUE)
+# metafor: rma(..., method = "REML", test = "knha")
+```
+
+See [00-setup.md](r-guides/00-setup.md#statistical-defaults-cochrane-2025-mandate) for details.
 
 ---
 

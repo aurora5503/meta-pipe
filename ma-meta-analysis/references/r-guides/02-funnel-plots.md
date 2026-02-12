@@ -21,6 +21,37 @@ library(ggplot2)     # Custom funnel plot (optional)
 
 ---
 
+## Why Log Scale Matters for Funnel Plots
+
+For **ratio measures** (HR, RR, OR), always plot on the **log scale**:
+
+| Scale           | Confidence region               | Verdict                                        |
+| --------------- | ------------------------------- | ---------------------------------------------- |
+| Natural (HR/RR) | Asymmetric -- wider on one side | Misleading: fake "asymmetry" even without bias |
+| Log (log HR/RR) | Symmetric                       | Correct: asymmetry = real evidence of bias     |
+
+The reason: the standard error of log(HR) is symmetric, but the standard error
+of HR itself is skewed. A symmetric funnel is the reference expectation, so you
+can only judge departures from symmetry when the baseline IS symmetric.
+
+### The Rule
+
+```r
+# For ratio measures (HR, RR, OR) with meta package:
+funnel(model, backtransf = FALSE, xlab = "Log HR")
+
+# For ratio measures with metafor package:
+funnel(res)  # metafor already uses log scale internally
+```
+
+`backtransf = FALSE` is the key parameter for `meta::funnel()`. Without it,
+the x-axis shows back-transformed values (HR, RR) and the shading is skewed.
+
+For **continuous measures** (SMD, MD), no transformation needed -- the scale is
+already linear and symmetric.
+
+---
+
 ## Quick Start: Standard Funnel Plot
 
 ```r
@@ -34,8 +65,8 @@ es <- escalc(measure = "RR",
              data = data)
 res <- rma(yi, vi, data = es, method = "REML")
 
-# Basic funnel plot (300 DPI)
-png("figures/funnel_plot.png", width = 3000, height = 2400, res = 300)
+# Basic funnel plot (300 DPI) -- metafor uses log scale by default
+png("figures/funnel_plot.png", width = 7, height = 6, units = "in", res = 300)
 funnel(res,
        xlab = "Log Risk Ratio",
        main = "Funnel Plot: Assessment of Publication Bias",
@@ -43,8 +74,40 @@ funnel(res,
        shade = "gray90",
        hlines = "gray80")
 dev.off()
+```
 
-cat("Done! Funnel plot saved.\n")
+### Quick Start: meta Package (HR/RR/OR)
+
+```r
+library(meta)
+
+# After fitting metagen/metabin with sm = "HR" / "RR" / "OR":
+png("figures/funnel_plot.png", width = 7, height = 6, units = "in", res = 300)
+funnel(meta_model,
+       backtransf = FALSE,            # <-- KEY: keeps log scale
+       studlab = TRUE, cex.studlab = 0.8,
+       xlab = paste0("Log ", meta_model$sm),
+       col = "navy", pch = 16)
+dev.off()
+```
+
+### Quick Start: With Egger's Test Annotation
+
+```r
+library(meta)
+
+# Egger's test
+bias_test <- metabias(meta_model, method.bias = "linreg")
+
+png("figures/funnel_with_egger.png", width = 7, height = 6, units = "in", res = 300)
+funnel(meta_model, backtransf = FALSE,
+       studlab = TRUE, cex.studlab = 0.8,
+       xlab = paste0("Log ", meta_model$sm),
+       col = "navy", pch = 16)
+title(sub = sprintf("Egger's test: t = %.2f, p = %.3f",
+                     bias_test$statistic, bias_test$p.value),
+      cex.sub = 0.9, col.sub = "gray40")
+dev.off()
 ```
 
 ---
@@ -89,7 +152,7 @@ res_tf <- trimfill(res)
 print(res_tf)
 
 # Plot with imputed studies
-png("figures/funnel_trimfill.png", width = 3000, height = 2400, res = 300)
+png("figures/funnel_trimfill.png", width = 7, height = 6, units = "in", res = 300)
 funnel(res_tf,
        xlab = "Log Risk Ratio",
        main = "Trim-and-Fill Funnel Plot")
@@ -144,7 +207,7 @@ print(res_beta)
 ```r
 library(metafor)
 
-png("figures/funnel_contour.png", width = 3000, height = 2400, res = 300)
+png("figures/funnel_contour.png", width = 7, height = 6, units = "in", res = 300)
 funnel(res,
        level = c(90, 95, 99),
        shade = c("white", "gray85", "gray75"),
@@ -169,7 +232,7 @@ studies had adequate power and which fell in "twilight" or "dark" regions.
 # install.packages("metaviz")
 library(metaviz)
 
-png("figures/funnel_sunset.png", width = 3000, height = 2400, res = 300)
+png("figures/funnel_sunset.png", width = 7, height = 6, units = "in", res = 300)
 viz_sunset(res,
            xlab = "Effect Size",
            ylab = "Standard Error",
@@ -335,7 +398,7 @@ m <- metagen(TE = es$yi,
 cop <- copas(m)
 summary(cop)
 
-png("figures/copas_plot.png", width = 3000, height = 2400, res = 300)
+png("figures/copas_plot.png", width = 7, height = 6, units = "in", res = 300)
 plot(cop)
 dev.off()
 
@@ -344,7 +407,7 @@ dev.off()
 lim <- limitmeta(m)
 summary(lim)
 
-png("figures/limitmeta_plot.png", width = 3000, height = 2400, res = 300)
+png("figures/limitmeta_plot.png", width = 7, height = 6, units = "in", res = 300)
 funnel(lim)
 dev.off()
 ```
@@ -402,6 +465,26 @@ to missing results in a synthesis. _Cochrane Handbook_, Chapter 13.
 
 ## Troubleshooting
 
+### Problem: Funnel shading is asymmetric / skewed (ratio measures)
+
+**Symptom**: Confidence region is wider on one side than the other, making it
+hard to tell if points are distributed symmetrically
+
+**Cause**: Plotting HR/RR/OR on the natural scale instead of the log scale.
+The standard error of a ratio is inherently asymmetric on the natural scale.
+
+**Solution**: Use `backtransf = FALSE` for `meta::funnel()`:
+
+```r
+# BAD: natural scale -- asymmetric shading
+funnel(model)
+
+# GOOD: log scale -- symmetric shading
+funnel(model, backtransf = FALSE, xlab = "Log HR")
+```
+
+For `metafor::funnel()`, the log scale is already the default (no fix needed).
+
 ### Problem: Funnel plot looks asymmetric
 
 **Not always publication bias!** Other causes:
@@ -453,13 +536,14 @@ selmodel(res, type = "stepfun", steps = 0.025,
 
 ```r
 # PNG (recommended)
-png("funnel_plot.png", width = 3000, height = 2400, res = 300)
-funnel(res)
+png("funnel_plot.png", width = 7, height = 6, units = "in", res = 300)
+funnel(model, backtransf = FALSE, xlab = "Log HR")  # log scale for ratio measures
 dev.off()
 
 # TIFF (some journals)
-tiff("funnel_plot.tif", width = 3000, height = 2400, res = 300, compression = "lzw")
-funnel(res)
+tiff("funnel_plot.tif", width = 7, height = 6, units = "in",
+     res = 300, compression = "lzw")
+funnel(model, backtransf = FALSE, xlab = "Log HR")
 dev.off()
 ```
 

@@ -2,6 +2,11 @@ library(meta)
 library(metafor)
 
 # Expect objects cont_es or bin_es from 02_effect_sizes.R
+#
+# Defaults: REML + Hartung-Knapp (Cochrane mandate, July 2025)
+#   method.tau = "REML"  -> replaces DerSimonian-Laird for tau² estimation
+#   hakn = TRUE          -> Hartung-Knapp-Sidik-Jonkman adjustment for CIs/p-values
+#   test = "knha"        -> metafor equivalent of hakn = TRUE
 
 if (exists("cont_es")) {
   cont_model <- metagen(
@@ -9,7 +14,8 @@ if (exists("cont_es")) {
     seTE = sqrt(cont_es$vi),
     studlab = cont_es$slab,
     sm = "SMD",
-    method.tau = "REML"
+    method.tau = "REML",
+    hakn = TRUE
   )
 }
 
@@ -19,11 +25,12 @@ if (exists("bin_es")) {
     seTE = sqrt(bin_es$vi),
     studlab = bin_es$slab,
     sm = "RR",
-    method.tau = "REML"
+    method.tau = "REML",
+    hakn = TRUE
   )
 }
 
 # Example metafor model
 if (exists("cont_es")) {
-  cont_rma <- rma(yi = cont_es$yi, vi = cont_es$vi, method = "REML")
+  cont_rma <- rma(yi = cont_es$yi, vi = cont_es$vi, method = "REML", test = "knha")
 }

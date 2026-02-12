@@ -57,7 +57,9 @@ lower_values <- c(NA, extraction$ci_lower, res$ci.lb)
 upper_values <- c(NA, extraction$ci_upper, res$ci.ub)
 
 # Create professional forest plot (300 DPI)
-png("figures/forest_plot.png", width=4200, height=3000, res=300)
+h <- forest_height(res)
+png("figures/forest_plot.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
 
 forestplot(
   labeltext = tabletext,
@@ -191,7 +193,9 @@ lower_values <- c(NA, data$ci_lower, exp(res$ci.lb))
 upper_values <- c(NA, data$ci_upper, exp(res$ci.ub))
 
 # Create forest plot (note: use log scale for RR)
-png("figures/forest_rr.png", width=4200, height=3000, res=300)
+h <- forest_height(res)
+png("figures/forest_rr.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
 
 forestplot(
   labeltext = tabletext,
@@ -255,7 +259,9 @@ lower_values <- c(NA, data$ci_lower, exp(res$ci.lb))
 upper_values <- c(NA, data$ci_upper, exp(res$ci.ub))
 
 # Create forest plot
-png("figures/forest_hr.png", width=4200, height=3000, res=300)
+h <- forest_height(res)
+png("figures/forest_hr.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
 
 forestplot(
   labeltext = tabletext,
@@ -314,7 +320,9 @@ lower_values <- c(NA, data$ci_lower, res$ci.lb)
 upper_values <- c(NA, data$ci_upper, res$ci.ub)
 
 # Create forest plot
-png("figures/forest_smd.png", width=4200, height=3000, res=300)
+h <- forest_height(res)
+png("figures/forest_smd.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
 
 forestplot(
   labeltext = tabletext,
@@ -429,6 +437,34 @@ lwd.ci = 2.5  # Thickness of CI lines
 
 ## Troubleshooting
 
+### Problem: Massive white padding around forest plot
+
+**Symptom**: Huge blank space above/below the plot content, or caption text overflowing
+
+**Cause**: Using fixed pixel dimensions in `png()` (e.g., `width=3000, height=2000`)
+that don't match the actual content size
+
+**Solution**: Use `forest_height()` with `units = "in"` -- see "Sizing & Margins" section above
+
+```r
+# BAD
+png("plot.png", width = 3000, height = 2000, res = 300)
+forest(model)
+
+# GOOD
+h <- forest_height(model)
+png("plot.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
+forest(model, spacing = 1.5)
+```
+
+### Problem: Subgroup test text overlaps with x-axis
+
+**Cause**: Not enough bottom margin for "Test for subgroup differences" line
+
+**Solution**: Increase bottom margin: `par(mar = c(5, 0, 1, 0))` and use
+`forest_height(model, subgroups = TRUE)` for extra footer space
+
 ### Problem: Row count mismatch
 
 **Error**: "You have provided X rows in your mean argument while the labels have Y rows"
@@ -483,36 +519,119 @@ txt_gp = fpTxtGp(label = gpar(cex=1.3))
 
 ---
 
+## Sizing & Margins (Avoiding White Padding)
+
+The most common forest plot problem: **massive white space** at top/bottom, or **text
+overlap** in the heterogeneity/subgroup-test footer. This happens because `png()` uses
+a fixed canvas size but `meta::forest()` content varies by study count.
+
+### The Fix: Dynamic Height Calculation
+
+```r
+# Calculate height based on number of studies
+forest_height <- function(model, subgroups = FALSE, spacing = 1.0) {
+  k <- model$k  # number of studies
+  header  <- 1.0                    # title + column labels
+  row_h   <- 0.35 * spacing         # per study row
+  footer  <- 1.5                    # heterogeneity stats + x-axis
+  n_rows  <- k + 1                  # studies + overall summary
+
+  if (subgroups && !is.null(model$bylevs)) {
+    n_sg   <- length(model$bylevs)
+    n_rows <- n_rows + n_sg * 2     # subgroup headers + subtotals
+    footer <- footer + 0.4          # "Test for subgroup differences" line
+  }
+
+  height_in <- header + (n_rows * row_h) + footer
+  height_in <- max(height_in, 4)    # minimum 4 inches
+  height_in <- min(height_in, 20)   # maximum 20 inches
+  return(height_in)
+}
+```
+
+### Using It
+
+```r
+# meta::forest() -- use units="in" with dynamic height
+h <- forest_height(meta_model)
+png("figures/forest_plot.png",
+    width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))   # bottom=4, left=0, top=1, right=0
+forest(meta_model, spacing = 1.5)
+dev.off()
+
+# With subgroups
+h <- forest_height(meta_model, subgroups = TRUE, spacing = 1.5)
+png("figures/forest_subgroup.png",
+    width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))   # extra bottom margin for subgroup test text
+forest(meta_model, spacing = 1.5)
+dev.off()
+```
+
+### Reference Table: Typical Heights
+
+| Studies | No subgroups | With 2 subgroups | With 3 subgroups |
+| ------- | ------------ | ---------------- | ---------------- |
+| 3       | 4.0 in       | 5.5 in           | 6.3 in           |
+| 5       | 4.6 in       | 6.1 in           | 6.9 in           |
+| 6       | 4.9 in       | 6.4 in           | 7.2 in           |
+| 10      | 6.3 in       | 7.8 in           | 8.6 in           |
+| 15      | 8.0 in       | 9.5 in           | 10.3 in          |
+| 20      | 9.8 in       | 11.3 in          | 12.1 in          |
+
+### Key Rules
+
+1. **Always use `units = "in"`** -- avoids pixel math confusion
+2. **Always set `par(mar = c(4, 0, 1, 0))`** -- controls margin padding
+3. **Never use fixed pixel heights** like `height = 3000` -- this is the root cause of white padding
+4. **Add bottom margin for subgroups** -- `mar = c(5, 0, 1, 0)` gives room for the test line
+5. **Use `spacing = 1.5`** -- improves readability without excess padding
+
+### Why Pixel-Based Sizing Fails
+
+```r
+# BAD: fixed pixels -- too tall for 6 studies, too short for 20
+png("plot.png", width = 3000, height = 2000, res = 300)
+# This creates a 10x6.67 inch canvas regardless of content
+
+# GOOD: dynamic inches -- fits content exactly
+h <- forest_height(model)
+png("plot.png", width = 10, height = h, units = "in", res = 300)
+```
+
+---
+
 ## Export Formats
 
 ### PNG (Recommended)
 
 ```r
-# High resolution (300 DPI)
-png("forest_plot.png", width=4200, height=3000, res=300)
-forestplot(...)
-dev.off()
-
-# Standard resolution (150 DPI)
-png("forest_plot.png", width=1400, height=1000, res=150)
-forestplot(...)
+# Dynamic height (ALWAYS use this pattern)
+h <- forest_height(model)
+png("forest_plot.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
+forest(model, spacing = 1.5)
 dev.off()
 ```
 
 ### TIFF (Some journals require)
 
 ```r
-tiff("forest_plot.tif", width=4200, height=3000, res=300, compression="lzw")
-forestplot(...)
+h <- forest_height(model)
+tiff("forest_plot.tif", width = 10, height = h, units = "in",
+     res = 300, compression = "lzw")
+par(mar = c(4, 0, 1, 0))
+forest(model, spacing = 1.5)
 dev.off()
 ```
 
-### EPS (Vector format)
+### PDF (Vector format, auto-sizes)
 
 ```r
-setEPS()
-postscript("forest_plot.eps", width=14, height=10)
-forestplot(...)
+# PDF auto-sizes based on content -- no height calculation needed
+pdf("forest_plot.pdf", width = 10)
+forest(model, spacing = 1.5)
 dev.off()
 ```
 
@@ -560,7 +679,9 @@ lower_values <- c(NA, data$ci_lower, res$ci.lb)
 upper_values <- c(NA, data$ci_upper, res$ci.ub)
 
 # 6. Create forest plot
-png("figures/forest_plot.png", width=4200, height=3000, res=300)
+h <- forest_height(res)
+png("figures/forest_plot.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(4, 0, 1, 0))
 
 forestplot(
   labeltext = tabletext,

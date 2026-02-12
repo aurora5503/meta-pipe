@@ -51,6 +51,26 @@ install.packages("tidyverse")
 
 ---
 
+## Statistical Defaults (Cochrane 2025 Mandate)
+
+From July 2025, Cochrane requires **REML + Hartung-Knapp** as default for all random-effects meta-analyses:
+
+```r
+# meta package: always set these two
+metagen(..., method.tau = "REML", hakn = TRUE)
+
+# metafor package: always set these two
+rma(..., method = "REML", test = "knha")
+```
+
+**Why?**
+
+- **REML** replaces DerSimonian-Laird for tau² estimation (less biased, especially with few studies)
+- **Hartung-Knapp (HKSJ)** uses t-distribution for CIs/p-values (wider, more honest intervals when k < 10)
+- Always run DL as sensitivity analysis for comparison, but REML + HKSJ should be the primary result
+
+---
+
 ## What Each Package Does
 
 ### The Recommended Stack (Essential)

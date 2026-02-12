@@ -19,6 +19,28 @@ library(grid)        # Graphics support
 
 ---
 
+## Sizing Helper (Copy from 01-forest-plots.md)
+
+```r
+# Dynamic PNG height for meta::forest() -- avoids white padding / text overlap
+forest_height <- function(model, subgroups = FALSE, spacing = 1.0) {
+  k <- model$k
+  header  <- 1.0
+  row_h   <- 0.35 * spacing
+  footer  <- 1.5
+  n_rows  <- k + 1
+  if (subgroups && !is.null(model$bylevs)) {
+    n_sg   <- length(model$bylevs)
+    n_rows <- n_rows + n_sg * 2
+    footer <- footer + 0.4
+  }
+  height_in <- max(4, min(20, header + n_rows * row_h + footer))
+  return(height_in)
+}
+```
+
+---
+
 ## Quick Start: Subgroup Forest Plot
 
 ```r
@@ -43,7 +65,10 @@ res <- metabin(
 )
 
 # Forest plot with subgroups (300 DPI)
-png("figures/forest_subgroup.png", width = 4200, height = 3600, res = 300)
+# Dynamic height -- see 01-forest-plots.md "Sizing & Margins" section
+h <- forest_height(res, subgroups = TRUE)
+png("figures/forest_subgroup.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))  # extra bottom for subgroup test line
 forest(res, sortvar = subgroup_var, layout = "JAMA")
 dev.off()
 ```
@@ -111,7 +136,9 @@ res <- metabin(
 res_sub <- update(res, subgroup = subgroup_var)
 
 # Step 3: Forest plot with subgroups
-png("figures/forest_subgroup_quick.png", width = 4200, height = 3600, res = 300)
+h <- forest_height(res_sub, subgroups = TRUE)
+png("figures/forest_subgroup_quick.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))
 forest(res_sub, sortvar = subgroup_var)
 dev.off()
 
@@ -143,12 +170,16 @@ res_sub <- metabin(
 )
 
 # BMJ-style layout
-png("figures/forest_subgroup_bmj.png", width = 4200, height = 3600, res = 300)
+h <- forest_height(res_sub, subgroups = TRUE)
+png("figures/forest_subgroup_bmj.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))
 forest(res_sub, layout = "BMJ", sortvar = subgroup_var)
 dev.off()
 
 # JAMA-style layout
-png("figures/forest_subgroup_jama.png", width = 4200, height = 3600, res = 300)
+h <- forest_height(res_sub, subgroups = TRUE)
+png("figures/forest_subgroup_jama.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))
 forest(res_sub, layout = "JAMA", sortvar = subgroup_var)
 dev.off()
 ```
@@ -251,7 +282,7 @@ res_mr <- rma(yi, vi, mods = ~ mean_age, data = es, method = "REML")
 print(res_mr)
 
 # Bubble plot using regplot() (preferred approach)
-png("figures/meta_regression_bubble.png", width = 3000, height = 2400, res = 300)
+png("figures/meta_regression_bubble.png", width = 8, height = 6, units = "in", res = 300)
 regplot(res_mr,
         xlab = "Mean Age (years)",
         ylab = "Log Risk Ratio",
@@ -273,7 +304,7 @@ library(metafor)
 library(ggplot2)
 
 # Manual bubble plot
-png("figures/meta_regression_manual.png", width = 3000, height = 2400, res = 300)
+png("figures/meta_regression_manual.png", width = 8, height = 6, units = "in", res = 300)
 
 wi <- 1 / sqrt(es$vi)
 size <- 0.5 + 3.0 * (wi - min(wi)) / (max(wi) - min(wi))
@@ -348,7 +379,7 @@ res_mod <- rma.mv(yi, vi,
                    method = "REML")
 
 # Orchard plot
-png("figures/orchard_subgroup.png", width = 3600, height = 2800, res = 300)
+png("figures/orchard_subgroup.png", width = 10, height = 8, units = "in", res = 300)
 orchard_plot(res_mod,
              mod = "subgroup_var",
              group = "study_id",
@@ -447,7 +478,9 @@ upper_vals <- c(upper_vals, exp(res_overall$ci.ub))
 is_summary <- c(is_summary, TRUE)
 
 # Create forest plot
-png("figures/forest_subgroup_custom.png", width = 4200, height = 3600, res = 300)
+n_rows <- length(mean_vals)
+h <- max(4, 1.0 + n_rows * 0.35 + 1.5)
+png("figures/forest_subgroup_custom.png", width = 10, height = h, units = "in", res = 300)
 
 forestplot(
   labeltext = list(tabletext_col1, tabletext_col2),
@@ -524,6 +557,24 @@ ggsave("figures/forest_subgroup_forestploter.png", p,
 ---
 
 ## Troubleshooting
+
+### Problem: White padding / text overflow in subgroup forest plot
+
+**Symptom**: Huge blank space or "Test for subgroup differences" text overlaps axis labels
+
+**Cause**: Fixed pixel height in `png()` doesn't account for subgroup rows
+
+**Solution**: Use dynamic height with extra margin:
+
+```r
+h <- forest_height(model, subgroups = TRUE, spacing = 1.5)
+png("plot.png", width = 10, height = h, units = "in", res = 300)
+par(mar = c(5, 0, 1, 0))  # bottom=5 for subgroup test line
+forest(model, spacing = 1.5)
+dev.off()
+```
+
+See [01-forest-plots.md "Sizing & Margins"](01-forest-plots.md#sizing--margins-avoiding-white-padding) for the `forest_height()` function.
 
 ### Problem: Too few studies per subgroup
 
