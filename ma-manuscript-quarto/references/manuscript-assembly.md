@@ -41,18 +41,35 @@ Use the **meta-manuscript-assembly** skill (`~/.claude/skills/meta-manuscript-as
    - Reference in Quarto: `![Figure 1](figures/figure1.png){#fig-1}`
 
 4. **Tables Integration** (1-2 hours)
-   - Create tables in Quarto markdown format
-   - Or include external files: `{{< include tables/table1.md >}}`
-   - Use `kable()` or `gt()` for dynamic tables
-   - Caption and label: `{#tbl-characteristics}`
+   - Generate tables in R using `gt` + `flextable` (see `06_analysis/07_export_tables.R`)
+   - Export as PNG, HTML, and DOCX via `gtsave()` and `save_as_docx()`
+   - Reference PNG images in `tables.qmd` as standalone images:
 
-5. **References & Rendering** (1-2 hours)
+     ```markdown
+     ## Table 1. Trial Characteristics {#tbl-characteristics}
+
+     ![](tables/table1_characteristics.png){width=100%}
+     ```
+
+   - Why PNG? Consistent rendering across all output formats, publication-quality formatting
+
+5. **Sync & Render** (30 min)
+   - Use Makefile to sync from `06_analysis/` and render:
+     ```bash
+     cd 07_manuscript/
+     make sync     # Copy figures + table PNGs from 06_analysis
+     make docx     # Render Word (tables as embedded PNG images)
+     make html     # Render self-contained HTML
+     make pdf      # Render PDF via Typst
+     make          # All of the above
+     ```
+   - Outputs: `index.html`, `index.pdf`, `index.docx`
+
+6. **References** (30 min)
    - Create `references.bib` with all citations
-   - Configure CSL style (e.g., `apa.csl`, `vancouver.csl`)
-   - Render outputs: `quarto render index.qmd`
-   - Outputs: `output/index.html`, `output/index.pdf`, `output/index.docx`
+   - Configure CSL style (e.g., `apa.csl`, `american-medical-association.csl`, `lancet.csl`)
 
-6. **Quality Assurance** (30-60 min)
+7. **Quality Assurance** (30-60 min)
    - Verify all citations resolved
    - Check figure/table cross-references
    - Validate output formats
@@ -75,51 +92,77 @@ Use the **meta-manuscript-assembly** skill (`~/.claude/skills/meta-manuscript-as
 
 ```
 07_manuscript/
-├── index.qmd                 # Main manuscript file
-├── _quarto.yml               # Quarto configuration
+├── index.qmd                 # Main manuscript (includes all sections)
+├── 00_abstract.qmd           # Abstract
+├── 01_introduction.qmd       # Introduction
+├── 02_methods.qmd            # Methods
+├── 03_results.qmd            # Results
+├── 04_discussion.qmd         # Discussion
+├── tables.qmd                # Tables (standalone PNG images)
+├── figures_legends.qmd       # Figure legends with embedded PNGs
+├── Makefile                  # Sync + render automation
 ├── references.bib            # BibTeX bibliography
-├── apa.csl                   # Citation style (optional)
-├── figures/
-│   ├── figure1.png           # Multi-panel figures (300 DPI)
-│   ├── figure2.png
+├── style.csl                 # Citation style (AMA, Lancet, etc.)
+├── figures/                  # ← Synced from 06_analysis/figures/
+│   ├── figure1_efs_forest.png
+│   ├── figure2_os_forest.png
 │   └── ...
-├── tables/
-│   ├── table1.md             # Table source files
-│   ├── table2.md
+├── tables/                   # ← Synced from 06_analysis/tables/
+│   ├── table1_characteristics.png
+│   ├── table2_rob2.png
 │   └── ...
-└── output/                   # Rendered outputs
-    ├── index.html            # HTML version
-    ├── index.pdf             # PDF version
-    └── index.docx            # Word version
+├── index.html                # Rendered HTML (self-contained)
+├── index.pdf                 # Rendered PDF (via Typst)
+└── index.docx                # Rendered Word (tables as PNG)
 ```
+
+### Build & Sync from 06_analysis
+
+The Makefile syncs analysis outputs before rendering:
+
+```
+06_analysis/                    07_manuscript/
+├── figures/*.png    ──cp──→   ├── figures/*.png
+├── tables/*.png     ──cp──→   ├── tables/*.png
+└── tables/*.csv     ──cp──→   └── tables/*.csv
+```
+
+**Sync direction is one-way**: always regenerate from R scripts in `06_analysis/`, never edit PNGs in `07_manuscript/` directly. Re-run `make sync` after any analysis update.
 
 ### Quarto YAML Frontmatter
 
 ```yaml
 ---
-title: "Effect of Immune Checkpoint Inhibitors in Neoadjuvant TNBC"
-subtitle: "A Systematic Review and Meta-Analysis"
-author:
-  - name: Author Name
-    affiliation: Institution
-date: today
+title: "Your Meta-Analysis Title"
 format:
   html:
     toc: true
     toc-depth: 3
-    theme: cosmo
-    embed-resources: true
-  pdf:
-    documentclass: article
-    geometry: margin=1in
-    keep-tex: true
+    number-sections: true
+    embed-resources: true # Self-contained HTML
   docx:
-    reference-doc: custom-reference.docx # optional
+    toc: true
+    number-sections: true # Tables render as embedded PNG images
+  typst:
+    toc: true
+    number-sections: true
+    columns: 1
+    margin:
+      x: 1in
+      y: 1in
+    papersize: us-letter
+    mainfont: "New Computer Modern"
+    fontsize: 11pt
 bibliography: references.bib
-csl: apa.csl # or vancouver.csl, lancet.csl
-number-sections: true
+csl: american-medical-association.csl # or lancet.csl, vancouver.csl
 ---
 ```
+
+**Format notes**:
+
+- **HTML**: `embed-resources: true` makes a single self-contained file
+- **DOCX**: Tables appear as PNG images (no editable cells, but consistent formatting)
+- **Typst**: Recommended over LaTeX for PDF (faster, cleaner output)
 
 ### Citation Examples
 
@@ -155,7 +198,36 @@ As shown in @fig-pcr, the addition of ICI to chemotherapy...
 
 ### Table Integration
 
-**Option 1: Quarto native tables**:
+**Option 1: Standalone PNG images (Recommended for DOCX)**:
+
+Generate tables in R with `gt` + `flextable`, export as PNG. Reference in `tables.qmd`:
+
+```markdown
+## Table 1. Trial Characteristics {#tbl-characteristics}
+
+![](tables/table1_characteristics.png){width=100%}
+```
+
+The R export script (`06_analysis/07_export_tables.R`) produces 3 formats per table:
+
+```r
+library(gt); library(flextable)
+
+export_table <- function(gt_tbl, ft_tbl, basename, vwidth = 800) {
+  gt_tbl %>% gtsave(paste0("tables/", basename, ".html"))
+  gt_tbl %>% gtsave(paste0("tables/", basename, ".png"), vwidth = vwidth)
+  save_as_docx(ft_tbl, path = paste0("tables/", basename, ".docx"))
+}
+```
+
+**Why PNG tables?**
+
+- Consistent rendering across HTML, PDF, and DOCX
+- Publication-quality formatting (colors, bold, footnotes) via `gt`
+- No Quarto rendering issues with complex tables
+- Single source of truth: R script generates everything
+
+**Option 2: Quarto native tables** (good for simple tables):
 
 ```markdown
 | Trial        | N    | ICI Regimen           | Control | pCR (ICI) | pCR (Control) |
@@ -168,13 +240,13 @@ As shown in @fig-pcr, the addition of ICI to chemotherapy...
 Reference in text: @tbl-characteristics shows...
 ```
 
-**Option 2: Include external markdown**:
+**Option 3: Include external markdown**:
 
 ```markdown
 {{< include tables/table1_characteristics.md >}}
 ```
 
-**Option 3: Dynamic tables from R**:
+**Option 4: Dynamic tables from R**:
 
 ````markdown
 ```{r}
@@ -196,18 +268,25 @@ The safety profile (@tbl-safety) was acceptable...
 
 ### Rendering Commands
 
-**Render all formats**:
+**Using Makefile (recommended)** — syncs from `06_analysis` before rendering:
 
 ```bash
-cd 07_manuscript
-quarto render index.qmd
+cd projects/<project>/07_manuscript
+
+make          # Sync + render all (HTML + PDF + DOCX)
+make sync     # Copy latest figures/tables from 06_analysis
+make html     # Sync + render HTML
+make pdf      # Sync + render PDF via Typst
+make docx     # Sync + render DOCX (tables as PNG images)
+make clean    # Remove generated outputs
+make view     # Render HTML + open in browser
 ```
 
-**Render specific format**:
+**Direct Quarto commands** (no auto-sync):
 
 ```bash
 quarto render index.qmd --to html
-quarto render index.qmd --to pdf
+quarto render index.qmd --to typst   # PDF via Typst
 quarto render index.qmd --to docx
 ```
 
@@ -215,12 +294,6 @@ quarto render index.qmd --to docx
 
 ```bash
 quarto preview index.qmd
-```
-
-**Specify output directory**:
-
-```bash
-quarto render index.qmd --output-dir output
 ```
 
 ---
@@ -253,15 +326,20 @@ Based on actual project experience:
 
 ### Tables
 
-❌ **Don't**: Create tables in Word first
-✅ **Do**: Create markdown tables, convert later
+❌ **Don't**: Create tables in Word or markdown manually
+✅ **Do**: Generate in R with `gt` + `flextable`, export as PNG
 
-- Reason: Easier to version control, easier to update numbers
+- Reason: Publication-quality formatting, consistent across all output formats, reproducible
+
+❌ **Don't**: Edit table PNGs in `07_manuscript/tables/` directly
+✅ **Do**: Edit R scripts in `06_analysis/`, re-export, then `make sync`
+
+- Reason: Single source of truth, one-way sync from analysis to manuscript
 
 ❌ **Don't**: Embed calculations in tables
-✅ **Do**: Calculate in R, copy results only
+✅ **Do**: Calculate in R, export formatted results via `gt`
 
-- Reason: Prevents transcription errors
+- Reason: Prevents transcription errors, reproducible
 
 ### Figures
 

@@ -155,7 +155,7 @@ If user says "continue", "what's next", or "status":
 | 04    | `04_fulltext/`   | manifest.csv              | PDFs collected      | ✅ [Template](ma-fulltext-management/references/fulltext-quickstart-template.md) |
 | 05    | `05_extraction/` | extraction.csv            | No missing study_id | —                                                                                |
 | 06    | `06_analysis/`   | figures/, tables/         | R scripts 01-12     | ✅ [Template](ma-meta-analysis/references/analysis-progress-template.md)         |
-| 07    | `07_manuscript/` | manuscript.pdf            | PRISMA complete     | ✅ [Template](ma-manuscript-quarto/references/manuscript-completion-template.md) |
+| 07    | `07_manuscript/` | index.docx/pdf/html       | PRISMA complete     | ✅ [Template](ma-manuscript-quarto/references/manuscript-completion-template.md) |
 | 08    | `08_reviews/`    | grade_summary.md          | GRADE filled        | —                                                                                |
 | 09    | `09_qa/`         | final_qa_report.md        | All checks pass     | —                                                                                |
 
@@ -667,10 +667,45 @@ uv run ../../ma-manuscript-quarto/scripts/insert_search_report.py \
   --search-report ../../projects/<project-name>/02_search/round-01/search_report.md \
   --methods projects/<project-name>/07_manuscript/02_methods.qmd
 
-# Render
+# Render (legacy script)
 uv run ../../ma-manuscript-quarto/scripts/render_manuscript.py \
   --root ../../projects/<project-name>/.. --index projects/<project-name>/07_manuscript/index.qmd
 ```
+
+### Build & Sync Workflow (Recommended)
+
+After analysis scripts in `06_analysis/` produce figures and tables, use the **Makefile** in `07_manuscript/` to sync outputs and render:
+
+```bash
+cd projects/<project-name>/07_manuscript
+
+make sync     # Copy figures/*.png + tables/*.{png,csv} from 06_analysis
+make docx     # Sync + render Word (tables as embedded PNG images)
+make html     # Sync + render self-contained HTML
+make pdf      # Sync + render PDF via Typst
+make          # Sync + render all formats
+```
+
+**Sync direction**: One-way `06_analysis → 07_manuscript`. Never edit PNGs in `07_manuscript/` directly.
+
+### Tables as Standalone PNG
+
+Tables are generated in R (`06_analysis/07_export_tables.R`) using `gt` + `flextable`, exported as PNG/HTML/DOCX. The manuscript `tables.qmd` references PNG images:
+
+```markdown
+## Table 1. Trial Characteristics {#tbl-characteristics}
+![](tables/table1_characteristics.png){width=100%}
+```
+
+**Why**: Consistent rendering across HTML/PDF/DOCX, publication-quality formatting via `gt`, no Quarto table issues.
+
+### Output Formats
+
+| Format | Command | Tables | Notes |
+| ------ | ------- | ------ | ----- |
+| HTML   | `make html` | Embedded PNG | Self-contained (`embed-resources`) |
+| DOCX   | `make docx` | Embedded PNG | For journal submission |
+| PDF    | `make pdf`  | Embedded PNG | Via Typst engine |
 
 </details>
 
