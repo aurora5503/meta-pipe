@@ -54,11 +54,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 test_case "setup.sh exists" "[ -f setup.sh ]"
 test_case "verify_environment.sh exists" "[ -f verify_environment.sh ]"
-test_case "setup_r_environment.R exists" "[ -f setup_r_environment.R ]"
-test_case "ENVIRONMENT_SETUP.md exists" "[ -f ENVIRONMENT_SETUP.md ]"
+test_case "setup_r_environment.R exists" "[ -f tooling/setup/setup_r_environment.R ]"
 test_case "ENVIRONMENT_QUICK_START.md exists" "[ -f ENVIRONMENT_QUICK_START.md ]"
-test_case "docs/ENVIRONMENT_FILES.md exists" "[ -f docs/ENVIRONMENT_FILES.md ]"
-test_case "docs/SETUP_SUMMARY.md exists" "[ -f docs/SETUP_SUMMARY.md ]"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -87,8 +84,6 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "4. Documentation Content Tests"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-test_case "ENVIRONMENT_SETUP.md contains setup instructions" "grep -q 'bash setup.sh' ENVIRONMENT_SETUP.md"
-test_case "ENVIRONMENT_SETUP.md contains troubleshooting" "grep -qi 'troubleshooting\|common issues' ENVIRONMENT_SETUP.md"
 test_case "ENVIRONMENT_QUICK_START.md contains quick commands" "grep -q 'Quick Start' ENVIRONMENT_QUICK_START.md"
 test_case "ENVIRONMENT_QUICK_START.md contains verification" "grep -q 'verify_environment' ENVIRONMENT_QUICK_START.md"
 
@@ -128,9 +123,6 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "8. Command Examples Tests (from docs)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-test_case "ENVIRONMENT_SETUP.md contains uv add example" "grep -q 'uv add' ENVIRONMENT_SETUP.md"
-test_case "ENVIRONMENT_SETUP.md contains R install example" "grep -q 'install.packages' ENVIRONMENT_SETUP.md"
-test_case "ENVIRONMENT_SETUP.md contains renv::snapshot example" "grep -q 'renv::snapshot' ENVIRONMENT_SETUP.md"
 test_case "ENVIRONMENT_QUICK_START.md contains restore commands" "grep -q 'renv::restore' ENVIRONMENT_QUICK_START.md"
 
 echo ""
@@ -146,9 +138,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "10. Documentation Cross-Reference Tests"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-test_case "ENVIRONMENT_FILES.md references all files" "grep -q 'setup.sh\|verify_environment.sh\|ENVIRONMENT_SETUP.md' docs/ENVIRONMENT_FILES.md"
-test_case "SETUP_SUMMARY.md exists and has content" "[ -s docs/SETUP_SUMMARY.md ]"
-test_case "docs reference each other correctly" "grep -q 'ENVIRONMENT_SETUP.md\|ENVIRONMENT_QUICK_START.md' docs/ENVIRONMENT_FILES.md"
+test_case "AGENTS.md references environment setup" "grep -q 'setup.sh\|verify_environment' AGENTS.md"
 
 echo ""
 echo "============================================================"

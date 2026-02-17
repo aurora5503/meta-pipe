@@ -75,7 +75,7 @@ uv run python -c "import pandas; print('✅ OK')"
 
 ```bash
 # Run R setup script
-Rscript setup_r_environment.R
+Rscript tooling/setup/setup_r_environment.R
 
 # Or manually:
 R
@@ -204,12 +204,6 @@ uv sync --upgrade
 renv::update()
 renv::snapshot()
 ```
-
----
-
-## 📖 Full Documentation
-
-See `ENVIRONMENT_SETUP.md` for detailed instructions
 
 ---
 
