@@ -312,20 +312,35 @@ coef_test(res_ml, vcov = "CR2")  # Cluster-robust SE
 
 **Best: `netmeta` (frequentist) or `gemtc` (Bayesian)**
 
-**Why**: `netmeta` is fast and produces automatic network plots. `gemtc` offers Bayesian inference with prior flexibility.
+**Why**: `netmeta` is fast, comprehensive, and produces automatic network plots, league tables, and treatment rankings. `gemtc` offers Bayesian inference with prior flexibility. Use NMA when comparing **≥3 treatments** with direct and indirect evidence.
+
+**📖 Full NMA workflow**: See [NMA R Guide](../../../ma-network-meta-analysis/references/nma-r-guide.md) for the complete 10-step pipeline with netmeta.
 
 ```r
-# Frequentist network meta-analysis
+# Frequentist network meta-analysis (PRIMARY)
 library(netmeta)
+
+# Check network connectivity first
+netconnection(treat1, treat2, studlab, data = network_data)
+
+# Fit NMA with REML (Cochrane-mandated default)
 net <- netmeta(
   TE, seTE, treat1, treat2, studlab,
   data = network_data,
-  sm = "RR"
+  sm = "RR",
+  random = TRUE,
+  method.tau = "REML"
 )
-netgraph(net)  # Network plot
-forest(net)    # Forest plot by comparison
 
-# Bayesian network meta-analysis
+netgraph(net)                            # Network geometry
+forest(net, ref = "Placebo")             # Forest plot
+netrank(net, small.values = "undesirable")  # P-score rankings
+netleague(net)                           # League table
+decomp.design(net)                       # Inconsistency test
+netsplit(net)                            # Node-splitting
+funnel(net)                              # Comparison-adjusted funnel
+
+# Bayesian network meta-analysis (SENSITIVITY)
 library(gemtc)
 network <- mtc.network(data.ab = network_data)
 model <- mtc.model(network, type = "consistency")
@@ -336,15 +351,35 @@ results <- mtc.run(model)
 
 | Package      | Strengths                                                                         | Weaknesses                           |
 | ------------ | --------------------------------------------------------------------------------- | ------------------------------------ |
-| **netmeta**  | Fast frequentist NMA, automatic network graphs, league tables, ranking (P-scores) | No Bayesian inference                |
+| **netmeta**  | Fast frequentist NMA, automatic network graphs, league tables, ranking (P-scores), no external deps, Cochrane recommended | No Bayesian inference                |
 | **gemtc**    | Bayesian NMA with JAGS, prior flexibility, inconsistency models                   | Slower (MCMC), requires JAGS install |
-| **multinma** | Modern Bayesian NMA with Stan, IPD + aggregate data integration                   | Newer package, fewer tutorials       |
+| **multinma** | Modern Bayesian NMA with Stan, IPD + aggregate data integration                   | Newer package, fewer tutorials, requires Stan |
 | **bnma**     | Bayesian NMA with contrast-based or arm-based models                              | Less active development              |
 
 **Recommendation**:
 
-- **For frequentist NMA**: Use `netmeta`
-- **For Bayesian NMA**: Use `gemtc` (mature) or `multinma` (modern)
+- **For all NMA projects**: Use `netmeta` as primary analysis (frequentist, no external deps)
+- **For Bayesian sensitivity**: Use `gemtc` (requires JAGS) in sensitivity analysis
+- **For IPD + aggregate**: Use `multinma` (requires Stan)
+
+**📖 Detailed comparison**: See [NMA Package Comparison](../../../ma-network-meta-analysis/references/nma-package-comparison.md)
+
+#### NMA Pipeline Scripts
+
+The full NMA workflow uses 10 R scripts in `ma-network-meta-analysis/assets/r/`:
+
+| Script | Purpose |
+|--------|---------|
+| `nma_01_setup.R` | Environment setup, install netmeta/gemtc |
+| `nma_02_data_prep.R` | Reshape data to contrast-based format |
+| `nma_03_network_graph.R` | Network geometry, connectivity check |
+| `nma_04_models.R` | Fit NMA (REML, fixed + random) |
+| `nma_05_inconsistency.R` | Design decomposition, heat plot, node-splitting |
+| `nma_06_forest_plots.R` | Forest plots by reference treatment |
+| `nma_07_ranking.R` | P-scores, league table |
+| `nma_08_funnel.R` | Comparison-adjusted funnel plot |
+| `nma_09_sensitivity.R` | Leave-one-out, Bayesian sensitivity |
+| `nma_10_tables.R` | Export tables as gt/PNG (300 DPI) |
 
 ---
 

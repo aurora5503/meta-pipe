@@ -116,12 +116,16 @@ Then proceed:
    - Date range limits?
    - Language restrictions?
    - Study design (RCTs only, or include observational?)
-5. **Initialize project** if not done:
+5. **Determine analysis type**:
+   - If TOPIC.txt describes ≥3 treatments → Network Meta-Analysis (`analysis_type: nma`)
+   - If TOPIC.txt describes 2 treatments → Standard Pairwise MA (`analysis_type: pairwise`)
+   - Record in `01_protocol/pico.yaml` and `01_protocol/decision-log.md`
+6. **Initialize project** if not done:
    ```bash
    cd /Users/htlin/meta-pipe
    uv run tooling/python/init_project.py --name <project-name>
    ```
-6. **Execute pipeline stages** in order, validating at each step
+7. **Execute pipeline stages** in order, validating at each step
 
 **⚠️ IMPORTANT**: All project data is in `projects/<project-name>/`. All commands below assume you're working with a specific project.
 
@@ -156,7 +160,7 @@ If user says "continue", "what's next", or "status":
 | 03    | `03_screening/`  | decisions.csv             | Kappa ≥ 0.60        | ✅ [Template](ma-screening-quality/references/screening-quickstart-template.md)  |
 | 04    | `04_fulltext/`   | manifest.csv              | PDFs collected      | ✅ [Template](ma-fulltext-management/references/fulltext-quickstart-template.md) |
 | 05    | `05_extraction/` | extraction.csv            | No missing study_id | —                                                                                |
-| 06    | `06_analysis/`   | figures/, tables/         | R scripts 01-12     | ✅ [Template](ma-meta-analysis/references/analysis-progress-template.md)         |
+| 06    | `06_analysis/`   | figures/, tables/         | R scripts 01-12 (pairwise) or nma_01-10 (NMA) | ✅ [Template](ma-meta-analysis/references/analysis-progress-template.md)         |
 | 07    | `07_manuscript/` | index.docx/pdf/html       | Outline approved + PRISMA complete | ✅ [Template](ma-manuscript-quarto/references/manuscript-completion-template.md) — **Outline required**: fill `manuscript_outline.md` first |
 | 08    | `08_reviews/`    | grade_summary.md          | GRADE filled        | —                                                                                |
 | 09    | `09_qa/`         | final_qa_report.md        | All checks pass     | —                                                                                |
@@ -170,6 +174,7 @@ If user says "continue", "what's next", or "status":
 Only ask if information is missing from TOPIC.txt:
 
 - Target population, intervention, comparator, outcomes (PICO)
+- **Analysis type (pairwise vs network)**: determined by number of treatment arms (≥3 → NMA)
 - Which databases to search
 - Risk-of-bias tool (RoB 2 vs ROBINS-I)
 - Effect measure (RR/OR/HR/SMD/MD)
@@ -591,6 +596,24 @@ Run in order from `06_analysis/`:
 12_sof_table.R                 # Summary of Findings table
 ```
 
+**Network meta-analysis (ma-network-meta-analysis/assets/r/) — use when `analysis_type: nma`:**
+
+```r
+# Execute NMA R scripts in order (replaces standard 01-09 for NMA projects)
+nma_01_setup.R                 # Load NMA packages (netmeta, gemtc)
+nma_02_data_prep.R             # Reshape to contrast-based format
+nma_03_network_graph.R         # Network geometry, connectivity check
+nma_04_models.R                # Fit frequentist NMA (REML)
+nma_05_inconsistency.R         # Design decomposition, heat plot, node-splitting
+nma_06_forest_plots.R          # Forest plots by reference treatment (300 DPI)
+nma_07_ranking.R               # P-scores, league table
+nma_08_funnel.R                # Comparison-adjusted funnel plot
+nma_09_sensitivity.R           # Leave-one-out, Bayesian sensitivity (gemtc)
+nma_10_tables.R                # League table + rankings as gt/PNG (300 DPI)
+```
+
+**📖 See**: [NMA R Guide](ma-network-meta-analysis/references/nma-r-guide.md) | [NMA Overview](ma-network-meta-analysis/references/nma-overview.md)
+
 **Figure export**:
 
 ```r
@@ -825,6 +848,14 @@ uv run ../../ma-end-to-end/scripts/checkpoint.py --restore --name pre-analysis -
   - [Table 1](ma-meta-analysis/references/r-guides/05-table1-gtsummary.md) - 30-60 min
   - [Multi-Panel Figures](ma-meta-analysis/references/r-guides/04-multi-panel.md) - 15-20 min
 - [Journal Formatting](ma-publication-quality/references/journal-formatting.md) - Lancet/JAMA/Nature Medicine requirements
+
+**Network Meta-Analysis** (for ≥3 treatments):
+
+- [NMA Overview](ma-network-meta-analysis/references/nma-overview.md) - When to use NMA vs pairwise MA (10 min)
+- [NMA R Guide](ma-network-meta-analysis/references/nma-r-guide.md) - Step-by-step netmeta workflow (30-45 min)
+- [NMA Reporting Checklist](ma-network-meta-analysis/references/nma-reporting-checklist.md) - PRISMA-NMA 32-item checklist
+- [NMA Package Comparison](ma-network-meta-analysis/references/nma-package-comparison.md) - netmeta vs gemtc vs multinma
+- [NMA Assumptions](ma-network-meta-analysis/references/nma-assumptions.md) - Transitivity, consistency, homogeneity
 
 **Reference**:
 

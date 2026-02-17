@@ -132,6 +132,20 @@ that must ALL be filled in with project-specific data.
 
 Once the outline is approved, write each section following it exactly.
 
+**Writing style**: All prose MUST follow `references/academic-writing-style.md`. Key rules:
+- **AMA style** (default) — superscript numbered citations, `american-medical-association.csl`, serial comma, generic drug names
+- **No contractions** (do not, cannot — never don't, can't)
+- **No vague language** (determine, not "figure out"; possibly, not "maybe")
+- **No imperative mood** ("The analysis was performed" — not "Run the analysis")
+- **No sentence fragments** in prose ("No data were available" — not "No data.")
+- **Passive voice** for Methods/Results; **active voice** for interpretation
+- **Formal transitions** (However, Therefore — not But, So)
+- **Precise terminology** (adverse events, not side effects; mortality, not death)
+- **Complete statistics** (every claim needs estimate + 95% CI + p-value)
+- **AMA numbers** — numerals with units, spell out at sentence start, "%" not "percent"
+- **AMA abbreviations** — define at first use in abstract AND body; no abbreviations in title
+- **No AI-flavored vocabulary** — cross-check with `human-write` skill after writing
+
 **Writing order** (this order is intentional — write data-driven sections first):
 1. Methods (most formulaic, establishes scope)
 2. Results (data-driven, references Methods)
@@ -446,6 +460,10 @@ uv run ma-manuscript-quarto/scripts/lint_qmd.py \
 
 - `assets/quarto/manuscript_outline.md` — **Outline & checklist template** (Phase 1). Copy to `07_manuscript/` and fill in before writing.
 - `assets/quarto/` provides an IMRaD Quarto scaffold.
+- `references/academic-writing-style.md` — **Academic writing style hub** (summary + validation checklist). Required reading before Phase 2.
+  - `references/style-no-ai-casual.md` — Rule 1 detail: contractions, vague language, imperative mood, fragments
+  - `references/style-professional-register.md` — Rule 2 detail: sentence structure, passive/active voice, transitions, terminology
+  - `references/style-ama-guide.md` — Rule 3 detail: AMA citations, bibliography, numbers, abbreviations, drug names, P values
 - `references/quarto-syntax-guide.md` — Quarto syntax reference for meta-analysis manuscripts.
 - `scripts/lint_qmd.py` validates and auto-fixes QMD/MD files against Quarto best practices.
 - `scripts/prisma_flow.py` generates a PRISMA flow diagram summary and optional SVG.
@@ -489,10 +507,19 @@ uv run ma-manuscript-quarto/scripts/lint_qmd.py \
 | Discussion | Verify each claim traces to Results | No orphan claims |
 | Introduction | Objectives match Results structure | Same number and order |
 | Abstract | Cross-check numbers vs Results | Exact match |
+| **Every section** | Academic writing style check (`references/academic-writing-style.md`) | No contractions, no fragments, no vague language, no imperative mood |
+| **Every section** | `human-write` AI vocabulary scan | Score <= 4 (light AI flavor) |
 
 ### Final validation (after all writing)
 
 - Run `scripts/lint_qmd.py --dir 07_manuscript/` — must pass with exit code 0 (no errors).
+- Verify academic writing style compliance (`references/academic-writing-style.md`):
+  - 0 contractions in prose (search `n't`, `'re`, `'ve`, `'ll`; exclude Crohn's, Hodgkin's).
+  - 0 sentence fragments in prose paragraphs.
+  - 0 imperative-mood sentences in prose (parenthetical "see Table S1" is acceptable).
+  - 0 vague terms (maybe, figure out, a lot, stuff, things, basically).
+  - Formal transitions varied (no single transition > 2 uses per subsection).
+- Run `human-write` AI vocabulary scan — score must be <= 4.
 - Ensure all figures are 300 DPI and tables are reproducible.
 - Cross-check that every result in the text appears in the analysis outputs.
 - Ensure each results paragraph maps to `07_manuscript/result_claims.csv`.

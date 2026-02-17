@@ -30,6 +30,19 @@
 **"I need Table 1 for my manuscript"** → [05-table1-gtsummary.md](05-table1-gtsummary.md)
 **"My colors look bad"** → [07-themes-colors.md](07-themes-colors.md)
 **"I'm new to ggplot2"** → [08-ggplot2-patterns.md](08-ggplot2-patterns.md)
+**"I need network meta-analysis"** → [NMA R Guide](../../../ma-network-meta-analysis/references/nma-r-guide.md) (separate module)
+
+### Network Meta-Analysis (≥3 treatments)
+
+NMA has its own dedicated module with 10 R scripts and 5 reference guides:
+
+| Guide | Time | Content |
+|-------|------|---------|
+| [NMA Overview](../../../ma-network-meta-analysis/references/nma-overview.md) | 10 min | When to use NMA vs pairwise |
+| [NMA R Guide](../../../ma-network-meta-analysis/references/nma-r-guide.md) | 30-45 min | Step-by-step R workflow |
+| [NMA Reporting](../../../ma-network-meta-analysis/references/nma-reporting-checklist.md) | 15 min | PRISMA-NMA checklist |
+| [NMA Packages](../../../ma-network-meta-analysis/references/nma-package-comparison.md) | 10 min | netmeta vs gemtc vs multinma |
+| [NMA Assumptions](../../../ma-network-meta-analysis/references/nma-assumptions.md) | 10 min | Transitivity, consistency |
 
 ---
 

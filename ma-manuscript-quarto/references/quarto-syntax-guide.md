@@ -262,13 +262,23 @@ nocite: |
 
 ### CSL Styles
 
-Default: Chicago Manual of Style author-date. Specify a journal style:
+**Pipeline default**: AMA (American Medical Association) — superscript numbered citations.
 
 ```yaml
-csl: lancet.csl
+csl: american-medical-association.csl
+```
+
+For alternative journals, override with the target journal CSL:
+
+```yaml
+csl: the-lancet.csl    # Lancet family
+csl: jama.csl          # JAMA family (also uses AMA style)
+csl: the-new-england-journal-of-medicine.csl  # NEJM (Vancouver-like)
 ```
 
 Find styles at the [CSL Project repository](https://github.com/citation-style-language/styles) or [Zotero Style Repository](https://www.zotero.org/styles).
+
+**See also**: `references/academic-writing-style.md` Rule 3 for full AMA citation, bibliography, and writing convention details.
 
 ---
 
@@ -398,13 +408,14 @@ Pre-built: ACM, PLOS, ASA, Elsevier, Biophysical Journal, ACS, JSS.
 
 ### Common Medical Journal CSL Files
 
-| Journal         | CSL File                                  |
-| --------------- | ----------------------------------------- |
-| Lancet          | `the-lancet.csl`                          |
-| JAMA            | `jama.csl`                                |
-| BMJ             | `bmj.csl`                                 |
-| NEJM            | `the-new-england-journal-of-medicine.csl` |
-| Nature Medicine | `nature-medicine.csl`                     |
+| Journal         | CSL File                                  | Citation Style |
+| --------------- | ----------------------------------------- | -------------- |
+| **AMA (default)** | **`american-medical-association.csl`**  | **Superscript numbered** |
+| Lancet          | `the-lancet.csl`                          | Superscript numbered |
+| JAMA            | `jama.csl`                                | Superscript numbered (AMA) |
+| BMJ             | `bmj.csl`                                 | Superscript numbered (Vancouver) |
+| NEJM            | `the-new-england-journal-of-medicine.csl` | Superscript numbered |
+| Nature Medicine | `nature-medicine.csl`                     | Superscript numbered |
 
 ---
 
