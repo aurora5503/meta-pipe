@@ -49,13 +49,23 @@ uv run ma-screening-quality/scripts/dual_review_agreement.py \
 
 ## Workflow
 
-1. **AI Screening (Reviewer 1)**: Run `ai_screen.py --project <name>` to auto-screen all records against `eligibility.md`. Fills `Reviewer1_Decision` and `Reviewer1_Reason` columns.
+1. **AI Screening (Reviewer 1)**: Run `ai_screen.py --project <name>` to auto-screen all records against `eligibility.md`.
+   - Read from `01_protocol/eligibility.md`
+   - Read from `03_screening/screening-database.csv`
+   - Write to `03_screening/round-01/decisions.csv` (fills `Reviewer1_Decision` and `Reviewer1_Reason` columns)
 2. **Human/AI Reviewer 2**: Either run `ai_screen.py --reviewer 2` for dual-AI review, or have a human fill `Reviewer2_Decision` and `Reviewer2_Reason` columns manually.
+   - Update `03_screening/round-01/decisions.csv` (adds `Reviewer2_Decision` and `Reviewer2_Reason` columns)
 3. **Compute agreement**: Run `dual_review_agreement.py` to calculate Cohen's kappa (target >= 0.60).
+   - Use `scripts/dual_review_agreement.py`
+   - Write to `03_screening/round-01/agreement.md`
 4. **Resolve conflicts**: Review records where Reviewer 1 and 2 disagree; fill `Final_Decision`.
+   - Update `03_screening/round-01/decisions.csv` (`Final_Decision` column)
 5. **Record exclusion reasons** using standardized labels from `references/screening-labels.md`.
+   - Write to `03_screening/round-01/exclusions.csv`
 6. **Quality/RoB assessment**: Assess included studies using the tool appropriate for the study design.
+   - Write to `03_screening/round-01/quality.csv`
 7. **Create `included.bib`** from final included studies.
+   - Write to `03_screening/round-01/included.bib`
 
 ## How `ai_screen.py` Works
 
@@ -71,10 +81,35 @@ uv run ma-screening-quality/scripts/dual_review_agreement.py \
 - `references/dual-review-schema.md` defines recommended decision columns.
 - `scripts/dual_review_agreement.py` computes agreement and Cohen's kappa.
 
+## Step 8: Analysis Type Confirmation Gate
+
+**When**: After screening is complete and included studies are identified.
+**Why**: The preliminary NMA vs Pairwise decision (from Stage 01) was based on treatment count alone. Now we have actual study data to validate that decision.
+
+**Trigger**: If `01_protocol/pico.yaml` has `analysis_type.preliminary: nma_candidate`
+
+### Procedure
+
+1. Tally study designs among included studies (RCT head-to-head, RCT vs control, single-arm, observational)
+   - Read from `03_screening/round-01/decisions.csv` (`Final_Decision` == "INCLUDE")
+2. Compute comparative study proportion (target: >70% for NMA)
+3. Assess network connectivity (common comparator? isolated nodes?)
+4. Preliminary transitivity check (similar populations across comparisons?)
+5. Record decision in `01_protocol/analysis-type-decision.md` (Stage 2)
+   - Update `01_protocol/analysis-type-decision.md` (fill Stage 2 section)
+6. Update `01_protocol/pico.yaml` with confirmed analysis type
+   - Update `01_protocol/pico.yaml` (L23: analysis_type.confirmed field)
+   - Update `01_protocol/pico.yaml` (L24: analysis_type.confirmation_stage = "03_screening")
+7. If changed from preliminary: document reason in `01_protocol/decision-log.md`
+   - Append to `01_protocol/decision-log.md`
+
+**If >30% single-arm studies**: NMA transitivity assumption is very strong — consider pairwise MA + pooled proportions instead.
+
 ## Validation
 
 - Compute agreement for dual screening when applicable (kappa >= 0.60).
 - Confirm all included studies meet eligibility criteria.
+- **If `nma_candidate`**: Confirm or change analysis type before proceeding to Stage 04.
 
 ## Pipeline Navigation
 

@@ -60,23 +60,33 @@ that must ALL be filled in with project-specific data.
 #### Step 1.1: Initialize project structure
 
 1. Initialize a Quarto project in `07_manuscript/`.
+   - Create `07_manuscript/_quarto.yml`
+   - Create `07_manuscript/index.qmd`
 2. Copy Quarto templates from `assets/quarto/` and adapt to the project.
+   - Copy `assets/quarto/00_abstract.qmd` → `07_manuscript/00_abstract.qmd`
+   - Copy `assets/quarto/01_introduction.qmd` → `07_manuscript/01_introduction.qmd`
+   - Copy templates 02-04 similarly
 3. Copy `assets/quarto/manuscript_outline.md` to `07_manuscript/manuscript_outline.md`.
+   - Copy `assets/quarto/manuscript_outline.md` → `07_manuscript/manuscript_outline.md`
 
 #### Step 1.2: Gather evidence (read BEFORE filling outline)
 
 4. Build a manuscript evidence map with `scripts/build_evidence_map.py` — review all analysis outputs.
+   - Use `scripts/build_evidence_map.py`
+   - Write to `07_manuscript/evidence_map.md`
    - **If the script fails**: manually read `06_analysis/` R outputs, CSVs, and figure files to build the map.
    - **If `06_analysis/` is incomplete**: STOP. Return to `/ma-meta-analysis` to complete analysis first.
 5. Initialize `result_claims.csv` with `scripts/init_result_claims.py` — map every result to its source.
+   - Use `scripts/init_result_claims.py`
+   - Write to `07_manuscript/result_claims.csv` (columns: claim_id, outcome, effect_measure, estimate, ci_lower, ci_upper, p_value, i2, figure_ref, table_ref, r_script, citation_keys)
    - **If the script fails**: manually create the CSV with columns: `claim_id, outcome, effect_measure, estimate, ci_lower, ci_upper, p_value, i2, figure_ref, table_ref, r_script, citation_keys`.
 6. Read ALL of the following before filling the outline:
    - `06_analysis/` — every R script output, CSV table, figure PNG
-   - `05_extraction/` — extraction.csv for study characteristics
-   - `01_protocol/pico.yaml` — for PICO details
+   - `05_extraction/extraction.csv` — for study characteristics
+   - `01_protocol/pico.yaml` (L1-28: all fields) — for PICO details
    - `02_search/` — search dates, database counts
-   - `03_screening/` — screening decisions, agreement stats
-   - `08_reviews/` — GRADE summary if available
+   - `03_screening/round-01/agreement.md` — screening decisions, Cohen's kappa
+   - `08_reviews/grade_summary.csv` — GRADE summary if available
    - Prior reviews (search PubMed for existing systematic reviews on the topic)
 
 #### Step 1.3: Fill in the outline (the core work of Phase 1)

@@ -32,11 +32,23 @@ Perform structured peer review and produce actionable feedback and validation ch
 ## Workflow
 
 1. Reviewer 1 focuses on methodology, inclusion criteria, and statistical validity.
+   - Review `01_protocol/pico.yaml`, `03_screening/round-01/agreement.md`, `06_analysis/validation.md`
+   - Write to `08_reviews/reviewer1.md`
 2. Reviewer 2 focuses on clarity, reporting completeness, and reproducibility.
+   - Review `07_manuscript/index.pdf`, `07_manuscript/prisma_checklist.md`
+   - Write to `08_reviews/reviewer2.md`
 3. Record issues with severity, location, and recommended fixes.
+   - Write to `08_reviews/action-items.md` (columns: issue_id, severity, location, recommendation, status)
 4. Create a consolidated action list with owners and status.
+   - Update `08_reviews/action-items.md`
 5. Initialize GRADE summary tables with `scripts/init_grade_summary.py` via `uv run`.
+   - Use `scripts/init_grade_summary.py`
+   - Read from `05_extraction/extraction.csv` (outcomes)
+   - Write to `08_reviews/grade_summary.csv` (columns: outcome, n_studies, n_participants, effect_estimate, certainty, reasons)
+   - Write to `08_reviews/grade_summary.md`
 6. Optionally generate preliminary GRADE suggestions with `scripts/auto_grade_suggestion.py`.
+   - Use `scripts/auto_grade_suggestion.py`
+   - Write to `08_reviews/grade_suggestions.csv`, `08_reviews/grade_suggestions.md`
 
 ## Resources
 

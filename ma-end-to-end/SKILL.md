@@ -42,19 +42,56 @@ tooling/python/   # uv project
 
 ## Workflow
 1. Read `TOPIC.txt` and produce protocol artifacts in `01_protocol/`.
+   - Read from `projects/<project-name>/TOPIC.txt`
+   - Use `/ma-topic-intake` skill
+   - Write to `01_protocol/pico.yaml`, `01_protocol/eligibility.md`, `01_protocol/outcomes.md`, `01_protocol/search-plan.md`, `01_protocol/decision-log.md`
+1b. **Preliminary** analysis type: ≥3 treatments → `nma_candidate`, 2 treatments → `pairwise`.
+    - Record in `01_protocol/pico.yaml` (L22: analysis_type.preliminary field)
+    - Record in `01_protocol/analysis-type-decision.md` (Stage 1 section)
 2. Plan and run database searches, then save round-based `.bib` files in `02_search/`.
+   - Use `/ma-search-bibliography` skill
+   - Write to `02_search/round-01/queries.txt`, `02_search/round-01/results.bib`, `02_search/round-01/dedupe.bib`, `02_search/round-01/log.md`
 3. Screen titles and abstracts, record decisions, and generate included `.bib` in `03_screening/`.
+   - Use `/ma-screening-quality` skill
+   - Write to `03_screening/round-01/decisions.csv`, `03_screening/round-01/included.bib`, `03_screening/round-01/agreement.md`
+3b. **Analysis Type Confirmation Gate** (if `nma_candidate`):
+    - Tally study designs, assess network connectivity and transitivity
+    - If >30% single-arm → strongly consider downgrading to pairwise + pooled proportions
+    - Confirm in `01_protocol/analysis-type-decision.md` (Stage 2 section)
+    - Update `01_protocol/pico.yaml` (L23: analysis_type.confirmed field)
+    - **Do NOT proceed to Stage 06 without confirmed analysis type**
 4. Collect full texts and build a manifest in `04_fulltext/`.
+   - Use `/ma-fulltext-management` skill
+   - Write to `04_fulltext/manifest.csv`, `04_fulltext/*.pdf`
 5. Extract data into a normalized database in `05_extraction/`.
+   - Use `/ma-data-extraction` skill
+   - Write to `05_extraction/extraction.sqlite`, `05_extraction/extraction.csv`, `05_extraction/data-dictionary.md`
 6. Run meta-analysis in R with `renv`, generate figures and tables in `06_analysis/`.
+   - Route by `analysis_type.confirmed`: `pairwise` | `nma` | `pooled_proportion` | `narrative`
+   - Use `/ma-meta-analysis` skill for pairwise
+   - Use `/ma-network-meta-analysis` skill for NMA
+   - Write to `06_analysis/*.R`, `06_analysis/figures/*.png`, `06_analysis/tables/*.csv`, `06_analysis/renv.lock`
 7. Draft and render Quarto manuscript in `07_manuscript/`.
+   - Use `/ma-manuscript-quarto` skill
+   - Write to `07_manuscript/*.qmd`, `07_manuscript/index.html`, `07_manuscript/index.pdf`
 8. Perform Reviewer 1 and Reviewer 2 checks and save notes in `08_reviews/`.
+   - Use `/ma-peer-review` skill
+   - Write to `08_reviews/grade_summary.csv`, `08_reviews/rob2_assessment.csv`
 9. Maintain cross-step validation logs in `09_qa/`.
+   - Write to `09_qa/pipeline-checklist.md`
 10. Add robustness checks: GRADE profiles, dual-review agreement stats, and PRISMA flow summary.
+    - Use `scripts/run_robustness_checks.py`
 11. Optionally run `scripts/run_robustness_checks.py` via `uv run` to generate all robustness artifacts at once.
+    - Use `scripts/run_robustness_checks.py`
 12. Apply publication-quality checks (PRISMA/MOOSE, HK, influence, SoF, claim audit, crossref).
+    - Use `/ma-publication-quality` skill
+    - Write to `09_qa/claim_audit.md`, `09_qa/crossref_report.md`, `09_qa/reporting_checklist_audit.md`
 13. Validate stage transitions with `scripts/validate_stage_transition.py` and store reports in `09_qa/`.
+    - Use `scripts/validate_stage_transition.py`
+    - Write to `09_qa/stage_transition_report.md`
 14. Create checkpoints before major steps with `scripts/checkpoint.py`.
+    - Use `scripts/checkpoint.py`
+    - Creates `.checkpoint/` snapshots
 
 ## Resources
 - `scripts/init_project.py` creates the numbered folder tree and a checklist.

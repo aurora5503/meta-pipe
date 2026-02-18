@@ -24,14 +24,25 @@ Run reproducible database searches, capture the search strategy, and produce ver
 ## Workflow
 
 1. Translate PICO terms into database-specific queries and save them in `queries.txt`.
+   - Read from `01_protocol/pico.yaml` (L1-8: population, intervention, comparison fields)
+   - Write to `02_search/round-01/queries.txt`
 2. Initialize Python tooling with uv in `tooling/python/` using `uv init` and `uv add` dependencies.
 3. Run search scripts with `uv run` from `tooling/python/` (avoid direct `python3` calls).
+   - Use `scripts/pubmed_fetch.py` (L105-155: fetch_pubmed_records function)
+   - Use `scripts/scopus_fetch.py` for Scopus API
 4. Use `uv tool` for any one-off CLI utilities (do not install them globally).
 5. **Always search PubMed + Scopus as the mandatory minimum** (PRISMA requires ≥2 databases). Optionally extend to Embase and Cochrane if defined in the protocol.
 6. Export results to `.bib` and record the run date, database, and query hash in `log.md`.
+   - Use `scripts/pubmed_fetch.py` (L54-103: build_bib_entry function)
+   - Write to `02_search/round-01/results.bib`
+   - Write metadata to `02_search/round-01/log.md`
 7. Deduplicate by DOI, PMID, and title, then save `dedupe.bib`.
+   - Use `scripts/dedupe_bib.py`
+   - Write to `02_search/round-01/dedupe.bib`
 8. If running updates, increment the round folder name and record deltas.
 9. **Generate PRISMA flowchart** after search completion using `generate_prisma_flowchart.R` (see below).
+   - Use `scripts/generate_prisma_flowchart.R`
+   - Output: `02_search/prisma-flow.png` (300 DPI minimum)
 
 ## PubMed Implementation Notes
 

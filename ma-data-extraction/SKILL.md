@@ -32,19 +32,32 @@ Extract consistent data, capture provenance, and build a clean analysis dataset.
 ### Phase 1: Web-Based Extraction (Default — Run First)
 
 1. Define a data dictionary that covers outcomes, covariates, and study identifiers.
+   - Write to `05_extraction/data-dictionary.md` (use `references/data-dictionary-template.md`)
 2. Initialize a normalized SQLite database using `scripts/init_extraction_db.py` via `uv run`.
+   - Use `scripts/init_extraction_db.py`
+   - Creates `05_extraction/extraction.sqlite`
 3. **Run WebSearch extraction for ALL included studies** — see **WebSearch Extraction (Default)** below.
+   - Read from `03_screening/round-01/included.bib` or `04_fulltext/manifest.csv`
    - This fills 70-80% of data fields automatically from PubMed, ClinicalTrials.gov, etc.
-   - Tag all web-sourced values with `[web]` in the `notes` column.
+   - Tag all web-sourced values with `[web]` in the `notes` column
+   - Write to `05_extraction/extraction.sqlite` (studies table)
 4. Review confidence scores: flag studies/fields with confidence < 0.7.
 
 ### Phase 2: PDF-Based Extraction (Only for Gaps)
 
 5. For studies with low-confidence fields, run `scripts/llm_extract.py` via `uv run` on available PDFs.
+   - Use `scripts/llm_extract.py`
+   - Read PDFs from `04_fulltext/*.pdf`
+   - Write to `05_extraction/llm_suggestions.jsonl`
 6. Extract remaining data with double-entry or verification where possible.
+   - Update `05_extraction/extraction.sqlite`
 7. Record unit conversions and assumptions in `05_extraction/extraction-log.md`.
+   - Write to `05_extraction/extraction-log.md`
 8. Export a tidy CSV for analysis and lock the database snapshot.
+   - Export `05_extraction/extraction.csv` from SQLite
 9. (Recommended) Record source references in `05_extraction/source.csv` and validate with `scripts/validate_sources.py`.
+   - Write to `05_extraction/source.csv` (use `references/source-template.csv`)
+   - Validate with `scripts/validate_sources.py` → `05_extraction/source_validation.md`
 
 ## Resources
 

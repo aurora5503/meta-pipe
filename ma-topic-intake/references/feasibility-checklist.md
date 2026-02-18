@@ -275,14 +275,34 @@ graph TD
 
 - ✅ ≥10 studies forming connected network
 - ✅ ≥3 different interventions compared
-- ✅ Transitivity assumption plausible
+- ✅ Transitivity assumption plausible (see checklist below)
 - ✅ Sufficient data for each comparison
+- ✅ >70% comparative studies (RCTs or controlled designs)
+
+**Transitivity pre-assessment** (must pass before confirming NMA):
+
+- [ ] Patient populations are similar across comparisons (age, stage, line of therapy)
+- [ ] Study settings are comparable (geographic, healthcare system)
+- [ ] Outcome definitions are consistent
+- [ ] Effect modifiers are evenly distributed across comparisons
+- [ ] No systematic differences in study era or standard of care
+
+**Single-arm study impact**:
+
+| Single-arm % | Recommendation |
+|-------------|---------------|
+| 0-10% | NMA feasible, exclude single-arm studies |
+| 10-30% | NMA possible with caution, sensitivity analysis ± single-arm |
+| 30-50% | Strongly consider pairwise MA + pooled proportions instead |
+| >50% | NMA NOT recommended — transitivity assumption too strong |
 
 **Red flags**:
 
 - ❌ Disconnected network (isolated comparisons)
 - ❌ High heterogeneity across comparisons
 - ❌ Insufficient studies per comparison node
+- ❌ Majority single-arm studies (no between-treatment effect sizes)
+- ❌ Systematic differences in patient populations across comparisons (transitivity violation)
 
 ### Individual Patient Data (IPD) Meta-Analysis
 

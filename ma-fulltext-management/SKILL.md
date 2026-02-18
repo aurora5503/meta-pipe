@@ -28,19 +28,32 @@ Gather full texts, validate completeness, and prepare a clean manifest.
 ### Phase 1: Web-Based Data Gathering (Default — No PDFs Needed)
 
 1. Create `04_fulltext/` and build `manifest.csv` with `record_id`, DOI, PMID, title, and access notes.
+   - Read from `03_screening/round-01/included.bib`
+   - Use `references/manifest-template.csv` as template
+   - Write to `04_fulltext/manifest.csv` (columns: record_id, DOI, PMID, title, access_method, confidence_score)
 2. **Automatically run web extraction** for all included studies using Claude Code's `WebSearch` and `WebFetch` tools:
    - Query PubMed structured abstracts (`https://pubmed.ncbi.nlm.nih.gov/<pmid>/`)
    - Query ClinicalTrials.gov registries (`https://clinicaltrials.gov/study/<nct_id>`)
    - Search Europe PMC, journal supplementary materials
 3. Record confidence scores per field (see `references/web-extraction.md` for scoring).
+   - Update `04_fulltext/manifest.csv` (confidence_score column)
 4. Flag studies with confidence < 0.7 for primary outcome fields → these need PDFs.
+   - Mark in `04_fulltext/manifest.csv` (needs_pdf = TRUE)
 
 ### Phase 2: Targeted PDF Retrieval (Only for Low-Confidence Studies)
 
 5. For flagged studies only (~20-30%), query Unpaywall for OA links using `scripts/unpaywall_fetch.py` via `uv run`.
+   - Use `scripts/unpaywall_fetch.py`
+   - Read from `04_fulltext/manifest.csv` (needs_pdf = TRUE rows)
+   - Write to `04_fulltext/unpaywall_results.csv`
 6. Download available PDFs with `scripts/download_oa_pdfs.py`.
+   - Use `scripts/download_oa_pdfs.py`
+   - Write to `04_fulltext/<record_id>.pdf`
 7. Optionally render PDF previews with `scripts/render_pdf_previews.py` for visual QA.
+   - Use `scripts/render_pdf_previews.py`
+   - Write to `04_fulltext/previews/<record_id>_page1.png`
 8. Request user to manually deposit any remaining PDFs that cannot be auto-retrieved.
+   - Update `04_fulltext/manifest.csv` (access_method = "manual")
 9. Run OCR only when needed and preserve original files.
 
 ### Why Web-First?

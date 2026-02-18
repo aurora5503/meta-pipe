@@ -45,15 +45,30 @@ Run DerSimonian-Laird as sensitivity analysis for comparison, but REML + HKSJ is
 ## Workflow
 
 1. Initialize `renv` in `06_analysis/` and record package versions.
+   - Run `renv::init()` in `06_analysis/`
+   - Creates `06_analysis/renv.lock`
 2. Copy the R templates from `assets/r/` into `06_analysis/` and adapt them to the study schema.
+   - Copy `assets/r/01_setup.R` → `06_analysis/01_setup.R`
+   - Copy templates 02-09 similarly
 3. Compute effect sizes with `metafor::escalc` for the outcome type.
+   - In `06_analysis/02_effect_sizes.R` (use `metafor::escalc()` function)
 4. Fit primary models using `meta` and/or `metafor` with REML + Hartung-Knapp defaults.
+   - In `06_analysis/03_models.R` (L10-30: metagen(..., method.tau = "REML", hakn = TRUE))
 5. Assess heterogeneity (I2, Q, tau2), subgroup analyses, and meta-regression when applicable.
+   - In `06_analysis/04_subgroups_meta_regression.R`
 6. Conduct sensitivity analyses and publication bias diagnostics.
+   - In `06_analysis/07_sensitivity.R`
+   - In `06_analysis/08_bias.R`
 7. Generate forest and funnel plots at 300 dpi.
+   - In `06_analysis/05_plots.R`
+   - Write to `06_analysis/figures/*.png` (png(..., res=300, width=3000, height=2400))
 8. Use `gtsummary` to build manuscript-ready summary tables.
+   - In `06_analysis/06_tables.R` (use `gtsummary::tbl_summary()`)
 9. Export tables as PNG/HTML/DOCX via `gt` + `flextable` for manuscript sync.
+   - In `06_analysis/07_export_tables.R`
+   - Write to `06_analysis/tables/*.png`, `06_analysis/tables/*.html`, `06_analysis/tables/*.docx`
 10. Summarize key results and decisions in `06_analysis/validation.md`.
+    - Write to `06_analysis/validation.md`
 
 ## Resources
 

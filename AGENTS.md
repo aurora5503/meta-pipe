@@ -66,19 +66,20 @@ meta-pipe/
 
 **Each stage has a dedicated skill with commands and workflow guidance**
 
-| Stage | Skill                       | Key Tasks                         | Invoke                          |
-| ----- | --------------------------- | --------------------------------- | ------------------------------- |
-| 00    | `/ma-topic-intake`          | Brainstorming, feasibility checks | `/brainstorm` or use skill      |
-| 01-02 | `/ma-search-bibliography`   | PROSPERO, search, dedupe          | Use skill for detailed commands |
-| 03    | `/ma-screening-quality`     | Dual-review screening, kappa      | Use skill for detailed commands |
-| 04    | `/ma-fulltext-management`   | PDF retrieval, Unpaywall          | Use skill for detailed commands |
-| 05    | `/ma-data-extraction`       | Data extraction, RoB assessment   | Use skill for detailed commands |
-| 06a   | `/ma-meta-analysis`         | Pairwise MA (R scripts 01-12)     | Use skill for detailed commands |
-| 06b   | `/ma-network-meta-analysis` | NMA (R scripts nma_01-10)         | Use skill for detailed commands |
-| 07    | `/ma-manuscript-quarto`     | Manuscript assembly, rendering    | Use skill for detailed commands |
-| 08    | `/ma-peer-review`           | GRADE assessment, SoF table       | Use skill for detailed commands |
-| 09    | `/ma-publication-quality`   | QA, overclaim audit, readiness    | Use skill for detailed commands |
-| 10    | `/ma-submission-prep`       | PROSPERO, final checks, submit    | Use skill for detailed commands |
+| Stage | Skill                       | Key Tasks                           | Invoke                           |
+| ----- | --------------------------- | ----------------------------------- | -------------------------------- |
+| 00    | `/ma-topic-intake`          | Brainstorming, feasibility checks   | `/brainstorm` or use skill       |
+| 01-02 | `/ma-search-bibliography`   | PROSPERO, search, dedupe            | Use skill for detailed commands  |
+| 03    | `/ma-screening-quality`     | Dual-review screening, kappa        | Use skill for detailed commands  |
+| 03b   | `/ma-screening-quality`     | **Analysis type confirmation gate** | Confirm NMA vs pairwise (Step 8) |
+| 04    | `/ma-fulltext-management`   | PDF retrieval, Unpaywall            | Use skill for detailed commands  |
+| 05    | `/ma-data-extraction`       | Data extraction, RoB assessment     | Use skill for detailed commands  |
+| 06a   | `/ma-meta-analysis`         | Pairwise MA (R scripts 01-12)       | Use skill for detailed commands  |
+| 06b   | `/ma-network-meta-analysis` | NMA (R scripts nma_01-10)           | Use skill for detailed commands  |
+| 07    | `/ma-manuscript-quarto`     | Manuscript assembly, rendering      | Use skill for detailed commands  |
+| 08    | `/ma-peer-review`           | GRADE assessment, SoF table         | Use skill for detailed commands  |
+| 09    | `/ma-publication-quality`   | QA, overclaim audit, readiness      | Use skill for detailed commands  |
+| 10    | `/ma-submission-prep`       | PROSPERO, final checks, submit      | Use skill for detailed commands  |
 
 **Orchestration**: `/ma-end-to-end` - Complete workflow management
 
@@ -98,14 +99,15 @@ Then proceed:
 2. **Read `projects/<project-name>/TOPIC.txt`** to understand the research question
 3. **Check project state** - which stages are complete in `projects/<project-name>/`?
 4. **Ask only essential questions** before proceeding:
-   - Databases to search (PubMed, Scopus, Embase, Cochrane?)
+   - Databases to search — **PubMed + Scopus are mandatory minimum** (PRISMA requires ≥2 databases); optionally add Embase, Cochrane
    - Date range limits?
    - Language restrictions?
    - Study design (RCTs only, or include observational?)
-5. **Determine analysis type**:
-   - If TOPIC.txt describes ≥3 treatments → Network Meta-Analysis (`analysis_type: nma`)
-   - If TOPIC.txt describes 2 treatments → Standard Pairwise MA (`analysis_type: pairwise`)
-   - Record in `01_protocol/pico.yaml` and `01_protocol/decision-log.md`
+5. **Preliminary analysis type** (two-stage decision — confirmed after screening):
+   - If TOPIC.txt describes ≥3 treatments → `analysis_type.preliminary: nma_candidate` (provisional)
+   - If TOPIC.txt describes 2 treatments → `analysis_type.preliminary: pairwise`
+   - Copy `analysis-type-decision-template.md` → `01_protocol/analysis-type-decision.md`, fill Stage 1
+   - **`nma_candidate` requires confirmation after screening** (see Step 3b in end-to-end)
 6. **Initialize project** if not done:
    ```bash
    cd /Users/htlin/meta-pipe
@@ -177,8 +179,8 @@ See [ma-manuscript-quarto/SKILL.md](ma-manuscript-quarto/SKILL.md) for detailed 
 Only ask if information is missing from TOPIC.txt:
 
 - Target population, intervention, comparator, outcomes (PICO)
-- **Analysis type (pairwise vs network)**: determined by number of treatment arms (≥3 → NMA)
-- Which databases to search
+- **Analysis type (pairwise vs network)**: preliminary by treatment count (≥3 → `nma_candidate`), confirmed after screening with transitivity assessment
+- Additional databases beyond PubMed + Scopus (mandatory minimum): Embase? Cochrane?
 - Risk-of-bias tool (RoB 2 vs ROBINS-I)
 - Effect measure (RR/OR/HR/SMD/MD)
 - Subgroup variables
