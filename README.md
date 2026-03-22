@@ -106,6 +106,26 @@ meta-pipe/
 | [CLAUDE.md](CLAUDE.md)                                      | Agent behavior (auto-loaded) |
 | [tooling/scripts/](tooling/scripts/)                        | Utility scripts              |
 
+## Citation
+
+If you use meta-pipe in your research, please cite it:
+
+**AMA Format**:
+
+> Lin HT, Yeh JT. meta-pipe: AI-assisted, end-to-end meta-analysis pipeline with reproducible tooling. GitHub; 2025. Accessed 2026. https://github.com/htlin222/meta-pipe
+
+**BibTeX**:
+
+```bibtex
+@software{lin_metapipe_2025,
+  author       = {Lin, Hsieh-Ting and Yeh, Jiunn-Tyng},
+  title        = {meta-pipe: AI-assisted, end-to-end meta-analysis pipeline with reproducible tooling},
+  year         = {2025},
+  url          = {https://github.com/htlin222/meta-pipe},
+  note         = {Accessed: 2026}
+}
+```
+
 ## Requirements
 
 - `uv` (Python)
@@ -121,13 +141,13 @@ If you use meta-pipe in your research, please cite it.
 
 **AMA format**:
 
-> Yeh JT, Lin HT. meta-pipe: AI-assisted, end-to-end meta-analysis pipeline with reproducible tooling. GitHub; 2026. Accessed March 22, 2026. https://github.com/htlin222/meta-pipe
+> Lin HT, Yeh JT. meta-pipe: AI-assisted, end-to-end meta-analysis pipeline with reproducible tooling. GitHub; 2026. Accessed March 22, 2026. https://github.com/htlin222/meta-pipe
 
 **BibTeX**:
 
 ```bibtex
-@software{yeh2026metapipe,
-  author    = {Yeh, Jiunn-Tyng and Lin, Hsieh-Ting},
+@software{lin2026metapipe,
+  author    = {Lin, Hsieh-Ting and Yeh, Jiunn-Tyng},
   title     = {meta-pipe: AI-Assisted, End-to-End Meta-Analysis Pipeline with Reproducible Tooling},
   year      = {2026},
   url       = {https://github.com/htlin222/meta-pipe},
